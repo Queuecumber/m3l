@@ -37,7 +37,7 @@ class VariedPatch(pl.LightningDataModule):
         self.train_transforms = Compose(
             [
                 RandomAffine(degrees=30, translate=(0.1, 0.5), scale=(0.8, 1.5), shear=(-25, 25, -25, 25), resample=Image.BILINEAR),
-                RandomCrop(256, pad_if_needed=True),
+                RandomCrop(512, pad_if_needed=True),
                 ColorJitter(0.25, 0.25, 0.25, 0.25),
                 RandomHorizontalFlip(),
                 RandomVerticalFlip(),
@@ -50,9 +50,9 @@ class VariedPatch(pl.LightningDataModule):
         if stage == "fit" or stage is None:
             div2k = UnlabeledImageFolder(self.root_dir / "DIV2K", transform=self.train_transforms)
             flickr2k = UnlabeledImageFolder(self.root_dir / "Flickr2K" / "Flickr2K_HR", transform=self.train_transforms)
-            self.patches = JPEGQuantizedDataset(ConcatDataset([div2k, flickr2k]), quality_range=(0, 100), stats=self.stats)
+            self.patches = JPEGQuantizedDataset(ConcatDataset([div2k, flickr2k]), quality=(0, 100), stats=self.stats)
 
-            self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(self.root_dir / "live1", transform=ToTensor()), quality_range=(10, 10), stats=self.stats)
+            self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(self.root_dir / "live1", transform=ToTensor()), quality=10, stats=self.stats)
 
         if stage == "test" or stage is None:
             pass

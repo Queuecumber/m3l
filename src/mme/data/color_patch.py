@@ -16,15 +16,13 @@ class ColorPatch(pl.LightningDataModule):
     pre-extracted
     """
 
-    def __init__(self, patch_dir: Union[str, Path], live1_dir: Union[str, Path], stats: Stats, batch_size: int, num_workers: int) -> None:
+    def __init__(self, root_dir: Union[str, Path], stats: Stats, batch_size: int, num_workers: int) -> None:
         super().__init__()
 
-        for p in (patch_dir, live1_dir):
-            if isinstance(p, str):
-                p = Path(p)
+        if isinstance(root_dir, str):
+            root_dir = Path(root_dir)
 
-        self.patch_dir = patch_dir
-        self.live1_dir = live1_dir
+        self.root_dir = root_dir
 
         self.stats = stats
 
@@ -32,8 +30,8 @@ class ColorPatch(pl.LightningDataModule):
         self.num_workers = num_workers
 
     def setup(self, stage: Optional[str] = None) -> None:
-        self.patches = JPEGQuantizedDataset(UnlabeledImageFolder(self.patch_dir, transform=ToTensor()), quality_range=(10, 100), stats=self.stats)
-        self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(self.live1_dir, transform=ToTensor()), quality_range=(10, 10), stats=self.stats)
+        self.patches = JPEGQuantizedDataset(UnlabeledImageFolder(self.root_dir / "ColorPatchTrain", transform=ToTensor()), quality=(10, 100, 10), stats=self.stats, deterministic_quality=True)
+        self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(self.root_dir / "live1", transform=ToTensor()), quality=10, stats=self.stats)
 
     def train_dataloader(self):
         return DataLoader(self.patches, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True, shuffle=True)

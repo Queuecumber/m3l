@@ -1,5 +1,5 @@
-from random import randint
-from typing import Any, Mapping, Optional, Sequence, Tuple
+from random import randint, randrange
+from typing import Any, Mapping, Optional, Sequence, Tuple, Union
 
 import torch
 from torch.functional import Tensor
@@ -29,20 +29,38 @@ class JPEGQuantizedDataset(Dataset):
 
     Args:
         data (:py:class:`torch.utils.data.Dataset`): The dataset to wrap
-        quality_range (tuple of two ints): The quality range to draw from, inclusive on both ends
+        quality (int, tuple of two or three ints): The quality range (min 0 max 100) to draw from, inclusive on both ends. If this is a single integer, only that quality is used, if it's three integers, the last one defines a step size.
         stats (:py:clas:`torchjpeg.dct.Stats`): Statstics to use for per-frequency per-channel coefficient normalization
         mcu (int): The size of the minimum coded unit, use 16 for 4:2:0 chroma subsampling.
         image_key (optional str): The key to use to extract the image from a dataset which returns a mapping.
+        deterministic_quality (bool): False by default, set to True to include the quality range in the dataset size. In other words, the length of this dataset will be `len(quality_range) * len(dataset)` and all the qualities in the range will
+            be represented for every image by interating this dataset.
     """
 
-    def __init__(self, dataset: Dataset, quality_range: Tuple[int, int], stats: Stats, mcu: int = 16, image_key: Optional[str] = None) -> None:
+    def __init__(self, dataset: Dataset, quality: Union[int, Sequence[int]], stats: Stats, mcu: int = 16, image_key: Optional[str] = None, deterministic_quality: bool = False) -> None:
+        assert (isinstance(quality, Sequence) and len(quality) > 0) or isinstance(quality, int)
+
+        if isinstance(quality, int):
+            quality = (quality, quality + 1, 1)
+        elif isinstance(quality, Sequence):
+            if len(quality) == 1:
+                quality = (quality[0], quality[0] + 1, 1)
+            elif len(quality) == 2:
+                quality = (quality[0], quality[1] + 1, 1)
+            elif len(quality) > 2:
+                quality = (quality[0], quality[1], quality[2])
+
         self.dataset = dataset
-        self.quality_range = quality_range
+        self.quality = quality
         self.stats = stats
         self.mcu = mcu
         self.image_key = image_key
+        self.deterministic_quality = deterministic_quality
 
     def __len__(self) -> int:
+        if self.deterministic_quality:
+            return len(self.dataset) * len(range(*self.quality))
+
         return len(self.dataset)
 
     def __dequantize_channel(self, channel, quantization):
@@ -53,7 +71,16 @@ class JPEGQuantizedDataset(Dataset):
         return dequantized_dct
 
     def __getitem__(self, idx) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Any]:
-        image = self.dataset[idx]
+        if not self.deterministic_quality:
+            image = self.dataset[idx]
+            quality = randrange(*self.quality)
+        else:
+            image_idx = idx % len(self.dataset)
+            quality_idx = idx // len(range(*self.quality))
+
+            image = self.dataset[image_idx]
+            quality = quality_idx * self.quality[2] + self.quality[0]
+
         labels = torch.empty(0)
 
         if isinstance(image, Sequence):
@@ -62,8 +89,6 @@ class JPEGQuantizedDataset(Dataset):
         elif isinstance(image, Mapping):
             labels = image
             image = image[self.dict_key]
-
-        quality = randint(*self.quality_range)
 
         s = torch.Tensor(list(image.shape))
         p = (torch.ceil(s / self.mcu) * self.mcu - s).long()
