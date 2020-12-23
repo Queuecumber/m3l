@@ -36,7 +36,7 @@ class ColorPatch(pl.LightningDataModule):
         self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(self.live1_dir, transform=ToTensor()), quality_range=(10, 10), stats=self.stats)
 
     def train_dataloader(self):
-        return DataLoader(self.patches, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True)
+        return DataLoader(self.patches, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.live1, batch_size=1, num_workers=self.num_workers, pin_memory=True)
