@@ -76,9 +76,9 @@ class QGACCrab(pl.LightningModule):
 
         loss = l1_e - 0.05 * ssim_e  # Minimize l1 error and maximize SSIM
 
-        self.log("train/loss", loss)
-        self.log("train/ssim", ssim_e)
-        self.log("train/l1", l1_e)
+        self.log("train/loss", loss, sync_dist=True)
+        self.log("train/ssim", ssim_e, sync_dist=True)
+        self.log("train/l1", l1_e, sync_dist=True)
 
         return loss
 
@@ -94,9 +94,9 @@ class QGACCrab(pl.LightningModule):
         psnrb_e = psnrb(restored_spatial, target_spatial).view(-1)
         ssim_e = ssim(restored_spatial, target_spatial).view(-1)
 
-        self.log("val/psnr", psnr_e, prog_bar=True)
-        self.log("val/psnrb", psnrb_e)
-        self.log("val/ssim", ssim_e)
+        self.log("val/psnr", psnr_e, prog_bar=True, sync_dist=True)
+        self.log("val/psnrb", psnrb_e, sync_dist=True)
+        self.log("val/ssim", ssim_e, sync_dist=True)
 
         return psnr_e, psnrb_e, ssim_e
 
