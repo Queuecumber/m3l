@@ -1,0 +1,3 @@
+*.pyc
+.vscode
+lightning_logs
