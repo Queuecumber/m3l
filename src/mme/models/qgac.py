@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -76,10 +76,11 @@ class QGAC(pl.LightningModule):
         self.log("train/loss", loss, sync_dist=True)
         self.log("train/ssim", ssim_e, sync_dist=True)
         self.log("train/l1", l1_e, sync_dist=True)
+        self.log("lr", self.optimizers().param_groups[0]["lr"], prog_bar=True)
 
         return loss
 
-    def validation_step(self, batch: QGACTrainingBatch, batch_idx: int):
+    def validation_step(self, batch: QGACTrainingBatch, batch_idx: int) -> Tuple[Tensor, Tensor, Tensor]:
         y, cbcr, q_y, q_c, target, _, _ = batch
 
         restored = self(q_y, y, q_c, cbcr)
@@ -98,11 +99,11 @@ class QGAC(pl.LightningModule):
         return psnr_e, psnrb_e, ssim_e
 
     def configure_optimizers(self) -> Optimizer:
-        optimizer = Adam(self.parameters(), lr=1e-3)
+        optimizer = Adam(self.parameters(), lr=1e-4)
         scheduler = CosineAnnealingLR(optimizer, 100, 1e-6)
         return {
             "optimizer": optimizer,
-            "lr_dict": {
+            "lr_scheduler": {
                 "scheduler": scheduler,
                 "interval": "step",
                 "frequency": 1000,
