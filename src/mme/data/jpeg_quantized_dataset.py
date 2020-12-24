@@ -76,7 +76,7 @@ class JPEGQuantizedDataset(Dataset):
             quality = randrange(*self.quality)
         else:
             image_idx = idx % len(self.dataset)
-            quality_idx = idx // len(range(*self.quality))
+            quality_idx = idx // len(self.dataset)
 
             image = self.dataset[image_idx]
             quality = quality_idx * self.quality[2] + self.quality[0]
