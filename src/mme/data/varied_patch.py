@@ -32,7 +32,7 @@ class VariedPatch(pl.LightningDataModule):
 
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.samples_total = 8000
+        self.samples_total = samples_total
 
         self.train_transforms = Compose(
             [

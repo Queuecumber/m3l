@@ -1,0 +1,7 @@
+defaults:
+  - optimizer: adam
+  - lr_scheduler: cosineannealinglr
+  - _self_
+
+optimizer:
+  lr: 1e-4

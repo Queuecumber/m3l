@@ -99,7 +99,7 @@ class QGAC(pl.LightningModule):
         return psnr_e, psnrb_e, ssim_e
 
     def configure_optimizers(self) -> Optimizer:
-        optimizer = Adam(self.parameters(), lr=1e-4)
+        optimizer = Adam(self.parameters(), lr=1e-4)  # TODO check if 1e-3 works here
         scheduler = CosineAnnealingLR(optimizer, 100, 1e-6)
         return {
             "optimizer": optimizer,

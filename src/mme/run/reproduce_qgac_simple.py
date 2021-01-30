@@ -21,12 +21,18 @@ to 25 to validate every 25 batches.
 import os
 from pathlib import Path
 
+import hydra
 import pytorch_lightning as pl
+from hydra.core.config_store import ConfigStore
+from hydra_configs.torch.optim import AdamConf
 from mme.data import ColorPatch
 from mme.models import QGAC
-from pytorch_lightning.callbacks import ModelCheckpoint
+from omegaconf import DictConfig
 from torchjpeg.dct import Stats
 
+from .register import register_hydra
+
+register_hydra()
 
 # See https://github.com/PyTorchLightning/pytorch-lightning/issues/2534#issuecomment-674582085
 class CheckpointEveryNSteps(pl.Callback):
@@ -50,7 +56,8 @@ class CheckpointEveryNSteps(pl.Callback):
             trainer.save_checkpoint(ckpt_path)
 
 
-def main():
+@hydra.main(config_name="../configs/original_qgac_paper")
+def main(cfg: DictConfig):
     stats = Stats(Path("/private/home/mehrlich/compression-robust-pkg/src/compression_robust/stats/cstats.pt"))
 
     lid_dir = Path("/checkpoint/mehrlich/lossless_image_datasets/lossless_image_datasets")
