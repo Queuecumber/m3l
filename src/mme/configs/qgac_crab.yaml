@@ -7,3 +7,4 @@ defaults:
 trainer:
   gpus: 1
   max_epochs: 200
+  

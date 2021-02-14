@@ -28,13 +28,17 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">= 3.6.2, < 3.9"
 pillow = "^8.0.1"
+
 torch = "1.7.1"
 torchvision = "0.8.2"
-pytorch-lightning = "1.1.6"
-hydra-core = "^1.1.0.dev3"
-submitit = "^1.2.0"
-yaspin = "^1.2.0"
 torchjpeg = "0.9.14"
+pytorch-lightning = "1.1.6"
+
+hydra-core = "1.1.0.dev3"
+hydra-submitit-launcher = "1.0.0rc5"
+submitit = "^1.2.1"
+
+yaspin = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
