@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-from mme.layers import RRDB, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
+from mm.layers import RRDB, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
 from torch import Tensor
 from torch.nn import Conv2d, ConvTranspose2d, Module, PReLU, Sequential
 from torchjpeg.dct import double_nn_dct

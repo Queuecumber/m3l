@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import pytorch_lightning as pl
 import torch
-from mme.layers import RRDB, CoefficientShuffler, ConvolutionalFilterManifold, PerFrequencyConvolution
+from mm.layers import RRDB, CoefficientShuffler, ConvolutionalFilterManifold, PerFrequencyConvolution
 from torch import Tensor
 from torch.nn import ConvTranspose2d, Module, PReLU, Sequential
 from torch.nn.functional import l1_loss, pad

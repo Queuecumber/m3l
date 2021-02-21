@@ -1,0 +1,11 @@
+defaults:
+  - optimizer: adam
+  - scheduler: cosine_annealing
+
+_target_: mm.models.QGACCrab
+_recursive_: no
+stats: 
+  _target_: torchjpeg.dct.Stats
+  root: ${modpath:}/../stats/cstats.pt
+
+  

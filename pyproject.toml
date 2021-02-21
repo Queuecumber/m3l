@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mme"
+name = "mm"
 version = "0.0.0" 
 description = "Multimedia Enhancement and Correction "
 authors = [
@@ -16,9 +16,9 @@ documentation = ""
 
 classifiers = [
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3 :: Only",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
@@ -26,24 +26,29 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">= 3.6.2, < 3.9"
+python = ">= 3.7, < 4.0"
 pillow = "^8.0.1"
 
 torch = "1.7.1"
 torchvision = "0.8.2"
-torchjpeg = "0.9.14"
+torchjpeg = "0.9.15"
 pytorch-lightning = "1.1.6"
 
 hydra-core = "1.1.0.dev3"
-hydra-submitit-launcher = "1.0.0rc5"
-submitit = "^1.2.1"
 
-yaspin = "^1.2.0"
+hydra-submitit-launcher = {version = "1.1.0", optional = true}
+submitit = { version = "^1.2.1", optional = true }
+mlflow = {version = "^1.14.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
 isort = "^5.6.4"
 pylint = "^2.6.0"
+
+[tool.poetry.extras]
+slurm = ["hydra-submitit-launcher", "submitit"]
+mlflow = ["mlflow"]
+
 
 [build-system]
 

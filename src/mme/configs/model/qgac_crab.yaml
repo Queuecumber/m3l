@@ -1,5 +1,0 @@
-_target_: mme.models.QGACCrab
-stats: 
-  _target_: torchjpeg.dct.Stats
-  root: ${path:/private/home/mehrlich/compression-robust-pkg/src/compression_robust/stats/cstats.pt}
-  

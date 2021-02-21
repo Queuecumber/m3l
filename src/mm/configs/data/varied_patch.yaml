@@ -1,7 +1,7 @@
-_target_: mme.data.VariedPatch
+_target_: mm.data.VariedPatch
 root_dir: /checkpoint/mehrlich/lossless_image_datasets/lossless_image_datasets
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${path:/private/home/mehrlich/compression-robust-pkg/src/compression_robust/stats/cstats.pt}
+  root: ${modpath:}/../stats/cstats.pt
 batch_size: 32
 num_workers: 10

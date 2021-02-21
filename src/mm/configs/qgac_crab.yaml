@@ -1,8 +1,7 @@
 defaults:
+  - experiment
   - data: varied_patch
   - model: qgac_crab
-  - trainer: lightning
-  - _self_
 
 trainer:
   gpus: 1
