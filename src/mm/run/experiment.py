@@ -10,6 +10,7 @@ class Experiment:
     data: pl.LightningDataModule
     model: pl.LightningModule
     trainer: pl.Trainer
+    name: str
     
     def fit(self) -> None:
         self.trainer.fit(self.model, self.data)
@@ -29,6 +30,7 @@ class ExperimentConfig:
     data: Any = MISSING
     model: Any = MISSING
     trainer: Any = MISSING
+    name: str = MISSING
     
 
 cs = ConfigStore.instance()

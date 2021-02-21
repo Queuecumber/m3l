@@ -1,1 +1,4 @@
+defaults:
+  - logger: tensorboard_local
+
 _target_: pytorch_lightning.Trainer
