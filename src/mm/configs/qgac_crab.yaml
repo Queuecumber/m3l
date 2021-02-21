@@ -6,4 +6,12 @@ defaults:
 trainer:
   gpus: 1
   max_epochs: 200
+
+model:
+  optimizer:
+    lr: 1e-3
+  scheduler:
+    eta_min: 1e-6
+
+name: qgac_crab
   
