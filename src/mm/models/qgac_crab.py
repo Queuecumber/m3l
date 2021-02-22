@@ -21,28 +21,78 @@ class QGACCrab(pl.LightningModule):
     QGAC model from "Analysing and Mitigating Compression Defects in Deep Learning"
     """
 
-    def __init__(self, stats: Stats, optimizer: DictConfig, scheduler: DictConfig) -> None:
+    def __init__(self, stats: DictConfig, optimizer: DictConfig, scheduler: DictConfig) -> None:
         super(QGACCrab, self).__init__()
 
-        self.stats = stats
+        self.stats = instantiate(stats)
 
         self.optimizer_config = optimizer
         self.scheduler_config = scheduler
 
-        self.block_y = ConvolutionalFilterManifold(in_channels=1, out_channels=256, kernel_size=8, stride=8, manifold_channels=16, post_activation=PReLU())
+        self.block_y = ConvolutionalFilterManifold(
+            in_channels=1,
+            out_channels=256,
+            kernel_size=8,
+            stride=8,
+            manifold_channels=16,
+            post_activation=PReLU(),
+        )
         self.block_enhancer_y = torch.nn.Sequential(*[RRDB(channels=256, kernel_size=3, padding=1) for _ in range(3)])
-        self.unblock_y = ConvolutionalFilterManifold(in_channels=256, out_channels=1, kernel_size=8, stride=8, manifold_channels=16, transposed=True)
+        self.unblock_y = ConvolutionalFilterManifold(
+            in_channels=256,
+            out_channels=1,
+            kernel_size=8,
+            stride=8,
+            manifold_channels=16,
+            transposed=True,
+        )
 
-        self.block_c = ConvolutionalFilterManifold(in_channels=2, out_channels=32, kernel_size=8, stride=8, manifold_channels=16, post_activation=PReLU())
+        self.block_c = ConvolutionalFilterManifold(
+            in_channels=2,
+            out_channels=32,
+            kernel_size=8,
+            stride=8,
+            manifold_channels=16,
+            post_activation=PReLU(),
+        )
         self.block_enhancer_lr = RRDB(kernel_size=3, channels=32, padding=1)
-        self.block_doubler = Sequential(ConvTranspose2d(in_channels=32, out_channels=32, kernel_size=4, stride=2, padding=1, bias=True), PReLU())
-        self.block_guide = ConvolutionalFilterManifold(in_channels=1, out_channels=32, kernel_size=8, stride=8, post_activation=PReLU())
+        self.block_doubler = Sequential(
+            ConvTranspose2d(
+                in_channels=32,
+                out_channels=32,
+                kernel_size=4,
+                stride=2,
+                padding=1,
+                bias=True,
+            ),
+            PReLU(),
+        )
+        self.block_guide = ConvolutionalFilterManifold(
+            in_channels=1,
+            out_channels=32,
+            kernel_size=8,
+            stride=8,
+            post_activation=PReLU(),
+        )
         self.block_enhancer_hr = RRDB(kernel_size=3, channels=64, padding=1)
-        self.unblock_c = ConvolutionalFilterManifold(in_channels=64, out_channels=2, kernel_size=8, stride=8, manifold_channels=16, transposed=True)
+        self.unblock_c = ConvolutionalFilterManifold(
+            in_channels=64,
+            out_channels=2,
+            kernel_size=8,
+            stride=8,
+            manifold_channels=16,
+            transposed=True,
+        )
 
         self.apply(lambda m: weight_init(scale=0.1, m=m))
 
-    def forward(self, q_y: Tensor, y: Tensor, q_c: Optional[Tensor] = None, cbcr: Optional[Tensor] = None) -> Tensor:
+    def forward(
+        self,
+        q_y: Tensor,
+        y: Tensor,
+        q_c: Optional[Tensor] = None,
+        cbcr: Optional[Tensor] = None,
+    ) -> Tensor:
         y = y + self.unblock_y(q_y, self.block_enhancer_y(self.block_y(q_y, y)))
 
         if cbcr is not None and cbcr.numel() > 0:
