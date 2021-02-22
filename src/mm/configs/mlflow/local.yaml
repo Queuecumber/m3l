@@ -1,0 +1,11 @@
+logging:
+  log_every_n_epoch: 1
+  log_models: yes
+  disable: no
+  exclusive: no
+run:
+  run_name: null
+  nested: False
+  tags: null
+tracking_uri: file://${env:HOME}/mlruns
+experiment: /${name}

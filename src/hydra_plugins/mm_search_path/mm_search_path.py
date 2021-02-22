@@ -6,6 +6,4 @@ from os import environ
 class MMSearchPathPlugin(SearchPathPlugin):
     def manipulate_search_path(self, search_path: ConfigSearchPath) -> None:
         search_path.prepend("mm", f"file:///etc/mm")
-        search_path.prepend("mm", f"file:///usr/share/mm")
-        search_path.prepend("mm", f"file:///usr/local/share/mm")
-        search_path.prepend("mm", f"file://{environ['HOME']}/.local/share/mm")
+        search_path.prepend("mm", f"file://{environ['HOME']}/.config/mm")
