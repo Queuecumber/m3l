@@ -2,5 +2,5 @@ defaults:
   - logging: default
   - run: default
   
-tracking_uri: file://${env:HOME}/mlruns
+tracking_uri: databricks
 experiment: /${name}
