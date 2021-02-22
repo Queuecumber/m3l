@@ -867,7 +867,7 @@ dev = ["black (==19.10b0)", "isort (==5.5.3)", "mypy (>=0.782)", "pre-commit (>=
 
 [[package]]
 name = "tabulate"
-version = "0.8.8"
+version = "0.8.9"
 description = "Pretty-print tabular data"
 category = "main"
 optional = true
@@ -1735,8 +1735,8 @@ submitit = [
     {file = "submitit-1.2.1.tar.gz", hash = "sha256:27078df91115f366dc4982cae51e6f397becbee1e83a44cabdf311672808efd9"},
 ]
 tabulate = [
-    {file = "tabulate-0.8.8-py3-none-any.whl", hash = "sha256:d6fe298fc0a58d848d6160118d17e70905f36766552ee78f8a1f4d64e8e16916"},
-    {file = "tabulate-0.8.8.tar.gz", hash = "sha256:26f2589d80d332fefd2371d396863dedeb806f51b54bdb4b264579270b621e92"},
+    {file = "tabulate-0.8.9-py3-none-any.whl", hash = "sha256:d7c013fe7abbc5e491394e10fa845f8f32fe54f8dc60c6622c6cf482d25d47e4"},
+    {file = "tabulate-0.8.9.tar.gz", hash = "sha256:eb1d13f25760052e8931f2ef80aaf6045a6cceb47514db8beab24cded16f13a7"},
 ]
 tensorboard = [
     {file = "tensorboard-2.4.1-py3-none-any.whl", hash = "sha256:7b8c53c396069b618f6f276ec94fc45d17e3282d668979216e5d30be472115e4"},

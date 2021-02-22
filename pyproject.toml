@@ -25,6 +25,11 @@ classifiers = [
     "Development Status :: 3 - Alpha"
 ]
 
+packages = [
+    { include = "mm", from = "src" },
+    { include = "hydra_plugins", from = "src" },
+]
+
 [tool.poetry.dependencies]
 python = ">= 3.7, < 4.0"
 pillow = "^8.0.1"
