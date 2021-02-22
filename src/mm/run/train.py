@@ -9,5 +9,6 @@ def main(cfg: ExperimentConfig) -> None:
     experiment: Experiment = instantiate(cfg)
     experiment.fit()
 
+
 if __name__ == "__main__":
     main()

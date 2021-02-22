@@ -21,13 +21,10 @@ class QGACCrab(pl.LightningModule):
     QGAC model from "Analysing and Mitigating Compression Defects in Deep Learning"
     """
 
-    def __init__(self, stats: DictConfig, optimizer: DictConfig, scheduler: DictConfig) -> None:
+    def __init__(self, stats: Stats, learning_config: DictConfig) -> None:
         super(QGACCrab, self).__init__()
-
-        self.stats = instantiate(stats)
-
-        self.optimizer_config = optimizer
-        self.scheduler_config = scheduler
+        self.stats = stats
+        self.learning_config = learning_config
 
         self.block_y = ConvolutionalFilterManifold(
             in_channels=1,
@@ -147,6 +144,6 @@ class QGACCrab(pl.LightningModule):
         return psnr_e, psnrb_e, ssim_e
 
     def configure_optimizers(self) -> Optimizer:
-        optimizer = instantiate(self.optimizer_config, params=self.parameters())
-        scheduler = instantiate(self.scheduler_config, optimizer=optimizer)
+        optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())
+        scheduler = instantiate(self.learning_config.scheduler, optimizer=optimizer)
         return [optimizer], [scheduler]

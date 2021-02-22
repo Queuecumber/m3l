@@ -1,6 +1,7 @@
 defaults:
-  - optimizer: adam
-  - scheduler: cosine_annealing
+  - learning_config: base
+  - learning_config/optimizer: adam
+  - learning_config/scheduler: cosine_annealing
 
 _target_: mm.models.QGACCrab
 _recursive_: no  # Fix this 
