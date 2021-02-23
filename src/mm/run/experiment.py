@@ -1,11 +1,27 @@
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, Callable, List, Optional
 import pytorch_lightning as pl
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf, MISSING, DictConfig
 from pathlib import Path
-from hydra.utils import call
 import contextlib
+from hydra.utils import instantiate
+
+
+defaults = [{"trainer": "lightning"}]
+
+
+@dataclass
+class ExperimentConfig:
+    defaults: List[Any] = field(default_factory=lambda: defaults)
+
+    _target_: str = "mm.run.Experiment"
+    data: Any = MISSING
+    model: Any = MISSING
+    trainer: Any = MISSING
+    name: str = MISSING
+    cluster: Any = None
+    mlflow: Any = None
 
 
 @dataclass
@@ -14,7 +30,7 @@ class Experiment:
     model: pl.LightningModule
     trainer: pl.Trainer
     name: str
-    runner: Optional[DictConfig]
+    cluster: Optional[DictConfig]
     mlflow: Optional[DictConfig]
 
     @property
@@ -37,21 +53,22 @@ class Experiment:
         with self.__optional_mlflow():
             self.trainer.test(datamodule=self.data)
 
+    @staticmethod
+    def run_experiment(cfg: ExperimentConfig, target: Callable[[Any], Any]):
+        def target_wrap(cfg: ExperimentConfig, job_env: Any):
+            if job_env is not None:
+                if job_env.global_rank != 0:
+                    cfg.mlflow = None
 
-defaults = [{"trainer": "lightning"}]
+            experiment: Experiment = instantiate(cfg)
+            return target(experiment)
 
+        if cfg.cluster is not None:
+            from .slurm import slurm_launch
 
-@dataclass
-class ExperimentConfig:
-    defaults: List[Any] = field(default_factory=lambda: defaults)
-
-    _target_: str = "mm.run.Experiment"
-    data: Any = MISSING
-    model: Any = MISSING
-    trainer: Any = MISSING
-    name: str = MISSING
-    runner: Any = None
-    mlflow: Any = None
+            slurm_launch(cfg, target_wrap)
+        else:
+            target_wrap(cfg, None)
 
 
 cs = ConfigStore.instance()

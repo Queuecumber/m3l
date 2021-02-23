@@ -23,8 +23,6 @@ from pathlib import Path
 
 import hydra
 import pytorch_lightning as pl
-from hydra.core.config_store import ConfigStore
-from hydra_configs.torch.optim import AdamConf
 from mm.data import ColorPatch
 from mm.models import QGAC
 from omegaconf import DictConfig
