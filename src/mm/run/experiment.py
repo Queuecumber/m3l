@@ -56,11 +56,8 @@ class Experiment:
     @staticmethod
     def run_experiment(cfg: ExperimentConfig, target: Callable[[Any], Any]):
         def target_wrap(cfg: ExperimentConfig, job_env: Any):
-            if job_env is not None:
-                if job_env.global_rank != 0:
-                    cfg.mlflow = None
-
             experiment: Experiment = instantiate(cfg)
+
             return target(experiment)
 
         if cfg.cluster is not None:

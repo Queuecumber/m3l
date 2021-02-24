@@ -4,7 +4,6 @@ defaults:
   - learning_config/scheduler: cosine_annealing
 
 _target_: mm.models.QGACCrab
-_recursive_: no  # Fix this 
 stats: 
   _target_: torchjpeg.dct.Stats
   root: ${modpath:}/../stats/cstats.pt

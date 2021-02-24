@@ -1,5 +1,5 @@
 _target_: mm.data.VariedPatch
-root_dir: /checkpoint/mehrlich/lossless_image_datasets/lossless_image_datasets
+root_dir: ???
 stats: 
   _target_: torchjpeg.dct.Stats
   root: ${modpath:}/../stats/cstats.pt

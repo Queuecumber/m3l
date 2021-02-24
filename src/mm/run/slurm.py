@@ -1,5 +1,6 @@
 import time
 from typing import Callable, Generator
+import sys
 
 from hydra.core.singleton import Singleton
 from omegaconf import DictConfig
@@ -18,6 +19,7 @@ class SlurmSubmission:
 
 
 def follow_slurm_job(job: Job) -> Generator[str, None, None]:
+    drain = False
     with open(job.paths.stdout, "rb") as fo:
         with open(job.paths.stderr, "rb") as fe:
             while True:
@@ -30,11 +32,7 @@ def follow_slurm_job(job: Job) -> Generator[str, None, None]:
                 if le:
                     yield le
 
-                if job.state not in ["RUNNING", "PENDING", "REQUEUED"] and not le and not lo:
-                    print(job.state)
-                    break
-                else:
-                    time.sleep(0.1)
+                time.sleep(0.1)
 
 
 def slurm_launch(

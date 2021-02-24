@@ -1,2 +1,4 @@
+_target_: types.SimpleNamespace
+_recursive_: no
 optimizer: ???
 scheduler: ???

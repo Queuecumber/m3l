@@ -36,9 +36,9 @@ class VariedPatch(pl.LightningDataModule):
 
         self.train_transforms = Compose(
             [
-                RandomAffine(degrees=30, translate=(0.1, 0.5), scale=(0.8, 1.5), shear=(-25, 25, -25, 25), resample=Image.BILINEAR),
-                RandomCrop(512, pad_if_needed=True),
-                ColorJitter(0.25, 0.25, 0.25, 0.25),
+                RandomAffine(degrees=30, translate=(0.1, 0.5), scale=(0.5, 1.5), shear=(-25, 25, -25, 25), resample=Image.BILINEAR),
+                RandomCrop(size=256, pad_if_needed=True),
+                ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0.25),
                 RandomHorizontalFlip(),
                 RandomVerticalFlip(),
                 ToTensor(),
