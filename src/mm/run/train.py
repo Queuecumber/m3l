@@ -1,11 +1,13 @@
 import hydra
 
 from .experiment import Experiment, ExperimentConfig
+from hydra.utils import instantiate
 
 
 @hydra.main(config_path="../configs")
 def main(cfg: ExperimentConfig) -> None:
-    Experiment.run_experiment(cfg, lambda e: e.fit())
+    e: Experiment = instantiate(cfg)
+    e.fit()
 
 
 if __name__ == "__main__":

@@ -1,7 +1,11 @@
-folder:  ${name}
-job_params:
-  job_name: ${name} 
-  nodes: 1  
-  gpus_per_task: 1
-  mem_per_gpu: 4GB
-  cpus_per_gpu: 1
+# @package _global_
+defaults:
+  - override /hydra/launcher: submitit_slurm
+
+hydra:
+  launcher:
+    name: ${name} 
+    nodes: 1  
+    gpus_per_task: 1
+    mem_per_gpu: 4GB
+    cpus_per_gpu: 1

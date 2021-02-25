@@ -1,4 +1,0 @@
-log_every_n_epoch: 1
-log_models: yes
-disable: no
-exclusive: no

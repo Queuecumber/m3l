@@ -1,6 +1,0 @@
-defaults:
-  - logging: default
-  - run: default
-  
-tracking_uri: file://${env:HOME}/mlruns
-experiment: /${name}
