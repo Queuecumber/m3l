@@ -6,3 +6,4 @@ outputs
 overrides
 multirun
 mlruns
+*.code-workspace
