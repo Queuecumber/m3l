@@ -1,11 +1,17 @@
+# @package _global_
 defaults:
-  - learning_config: base
-  - learning_config/optimizer: adam
-  - learning_config/scheduler: cosine_annealing
+  - /data: varied_patch
+  - /net: qgac_crab
 
-_target_: mm.models.QGACCrab
-stats: 
-  _target_: torchjpeg.dct.Stats
-  root: ${modpath:}/../stats/cstats.pt
+trainer:
+  max_epochs: 200
 
+net:
+  learning_config:
+    optimizer:
+      lr: 1e-4
+    scheduler:
+      eta_min: 1e-6
+
+name: qgac_crab
   

@@ -11,6 +11,7 @@ from torch.optim import Optimizer
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 from hydra.utils import instantiate
+from types import SimpleNamespace
 
 from .qgac_base import QGACTrainingBatch
 from .weight_init import weight_init
@@ -21,7 +22,7 @@ class QGACCrab(pl.LightningModule):
     QGAC model from "Analysing and Mitigating Compression Defects in Deep Learning"
     """
 
-    def __init__(self, stats: Stats, learning_config: DictConfig) -> None:
+    def __init__(self, stats: Stats, learning_config: SimpleNamespace) -> None:
         super(QGACCrab, self).__init__()
         self.stats = stats
         self.learning_config = learning_config

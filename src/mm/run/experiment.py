@@ -14,7 +14,7 @@ class ExperimentConfig:
 
     _target_: str = "mm.run.Experiment"
     data: Any = MISSING
-    model: Any = MISSING
+    net: Any = MISSING
     trainer: Any = MISSING
     name: str = MISSING
 
@@ -22,12 +22,12 @@ class ExperimentConfig:
 @dataclass
 class Experiment:
     data: pl.LightningDataModule
-    model: pl.LightningModule
+    net: pl.LightningModule
     trainer: pl.Trainer
     name: str
 
     def fit(self) -> None:
-        self.trainer.fit(self.model, self.data)
+        self.trainer.fit(self.net, self.data)
 
     def test(self) -> None:
         self.trainer.test(datamodule=self.data)
