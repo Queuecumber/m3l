@@ -3,7 +3,6 @@
 lightning_logs
 outputs
 *.egg-info
-overrides
 multirun
 mlruns
 *.code-workspace
