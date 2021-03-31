@@ -4,4 +4,4 @@ stats:
   _target_: torchjpeg.dct.Stats
   root: ${modpath:}/../stats/cstats.pt
 batch_size: 32
-num_workers: 10
+num_workers: 1
