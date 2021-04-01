@@ -1,17 +1,19 @@
+from types import SimpleNamespace
 from typing import Optional
 
 import pytorch_lightning as pl
 import torch
+from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
-from omegaconf import DictConfig
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.utilities import _module_available
 from torch import Tensor
 from torch.nn import ConvTranspose2d, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
-from hydra.utils import instantiate
-from types import SimpleNamespace
+from torchvision.transforms.functional import to_pil_image
 
 from .qgac_base import QGACTrainingBatch
 from .weight_init import weight_init
@@ -126,6 +128,9 @@ class QGACCrab(pl.LightningModule):
 
         return loss
 
+    def training_epoch_end(self, training_step_outputs):
+        self.log("train/lr", self.optimizers().optimizer.param_groups[0]["lr"], prog_bar=True)
+
     def validation_step(self, batch: QGACTrainingBatch, batch_idx: int):
         y, cbcr, q_y, q_c, target, _, _ = batch
 
@@ -142,7 +147,18 @@ class QGACCrab(pl.LightningModule):
         self.log("val/psnrb", psnrb_e, sync_dist=True)
         self.log("val/ssim", ssim_e, sync_dist=True)
 
-        return psnr_e, psnrb_e, ssim_e
+        if batch_idx == 0:
+            return psnr_e, psnrb_e, ssim_e, restored_spatial
+        else:
+            return psnr_e, psnrb_e, ssim_e, None
+
+    def validation_epoch_end(self, validation_step_outputs):
+        _, _, _, restored_example = validation_step_outputs[0]
+
+        if _module_available("wandb") and isinstance(self.trainer.logger, WandbLogger):
+            from wandb import Image
+
+            self.logger.experiment.log({"val/restored": Image(to_pil_image(restored_example.squeeze(0)), caption="Restored")}, commit=False)
 
     def configure_optimizers(self) -> Optimizer:
         optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())

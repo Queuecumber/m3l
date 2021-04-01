@@ -1,6 +1,5 @@
 defaults:
   - experiment
   - model: ???
-  - cluster: simple
   - overrides: none
   - override /hydra/launcher: submitit_slurm

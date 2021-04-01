@@ -1,9 +1,13 @@
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
-import pytorch_lightning as pl
-from hydra.core.config_store import ConfigStore
-from omegaconf import OmegaConf, MISSING, DictConfig
 from pathlib import Path
+from typing import Any, List
+
+import pytorch_lightning as pl
+import torch.jit
+from hydra.core.config_store import ConfigStore
+from omegaconf import MISSING, OmegaConf
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.utilities import _module_available
 
 defaults = [{"trainer": "lightning"}]
 
@@ -28,6 +32,16 @@ class Experiment:
 
     def fit(self) -> None:
         self.trainer.fit(self.net, self.data)
+
+        script = self.net.to_torchscript()
+        torch.jit.save(script, f"{self.name}.pt")
+
+        if _module_available("wandb") and isinstance(self.trainer.logger, WandbLogger):
+            import wandb
+
+            trained_model_artifact = wandb.Artifact("trained_model", type="model", description=f"Trained {self.name} model")
+            trained_model_artifact.add_file(f"{self.name}.pt")
+            self.trainer.logger.experiment.log_artifact(trained_model_artifact)
 
     def test(self) -> None:
         self.trainer.test(datamodule=self.data)

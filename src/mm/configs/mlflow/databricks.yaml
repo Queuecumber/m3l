@@ -1,4 +1,0 @@
-# @package trainer.logger
-_target_: pytorch_lightning.loggers.MLFlowLogger
-experiment_name: /${name}
-tracking_uri: databricks
