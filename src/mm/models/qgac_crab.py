@@ -95,7 +95,7 @@ class QGACCrab(pl.LightningModule):
     ) -> Tensor:
         y = y + self.unblock_y(q_y, self.block_enhancer_y(self.block_y(q_y, y)))
 
-        if cbcr is not None and cbcr.numel() > 0:
+        if q_c is not None and cbcr is not None and cbcr.numel() > 0:
             c = self.block_doubler(self.block_enhancer_lr(self.block_c(q_c, cbcr)))
 
             y_blocks = self.block_guide(q_y, y)
@@ -155,10 +155,7 @@ class QGACCrab(pl.LightningModule):
     def validation_epoch_end(self, validation_step_outputs):
         _, _, _, restored_example = validation_step_outputs[0]
 
-        if _module_available("wandb") and isinstance(self.trainer.logger, WandbLogger):
-            from wandb import Image
-
-            self.logger.experiment.log({"val/restored": Image(to_pil_image(restored_example.squeeze(0)), caption="Restored")}, commit=False)
+        self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), step=self.global_step or 0)
 
     def configure_optimizers(self) -> Optimizer:
         optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())

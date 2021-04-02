@@ -1,23 +1,26 @@
+from typing import Any
+
 import torch
 import torch.nn.functional
+from torch import Tensor
 
 
 class ConvolutionalFilterManifold(torch.nn.Module):
     def __init__(
         self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride=1,
-        dilation=1,
-        padding=0,
-        transposed=False,
-        bias=True,
-        manifold_channels=64,
-        activation=torch.nn.PReLU,
-        manifold_bias=True,
-        post_activation=None,
-    ):
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        dilation: int = 1,
+        padding: int = 0,
+        transposed: bool = False,
+        bias: bool = True,
+        manifold_channels: int = 64,
+        activation: Any = torch.nn.PReLU,
+        manifold_bias: bool = True,
+        post_activation: Any = None,
+    ) -> None:
         super(ConvolutionalFilterManifold, self).__init__()
 
         self.in_channels = in_channels
@@ -63,7 +66,7 @@ class ConvolutionalFilterManifold(torch.nn.Module):
         else:
             self.bias_transfrom = None
 
-    def forward(self, q, x):
+    def forward(self, q: Tensor, x: Tensor) -> Tensor:
         m = self.manifold(q)
 
         batch_size = x.shape[0]
