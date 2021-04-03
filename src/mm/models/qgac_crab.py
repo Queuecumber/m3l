@@ -155,7 +155,7 @@ class QGACCrab(pl.LightningModule):
     def validation_epoch_end(self, validation_step_outputs):
         _, _, _, restored_example = validation_step_outputs[0]
 
-        self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), step=self.global_step or 0)
+        self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
 
     def configure_optimizers(self) -> Optimizer:
         optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())
