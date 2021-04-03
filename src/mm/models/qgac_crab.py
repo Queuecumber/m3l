@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.loggers import CometLogger
 from pytorch_lightning.utilities import _module_available
 from torch import Tensor
 from torch.nn import ConvTranspose2d, PReLU, Sequential
@@ -155,7 +155,8 @@ class QGACCrab(pl.LightningModule):
     def validation_epoch_end(self, validation_step_outputs):
         _, _, _, restored_example = validation_step_outputs[0]
 
-        self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
+        if _module_available("comet_ml") and isinstance(self.trainer.logger, CometLogger):
+            self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
 
     def configure_optimizers(self) -> Optimizer:
         optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())
