@@ -1,1 +1,4 @@
 _target_: pytorch_lightning.Trainer
+plugins:
+  - _target_: pytorch_lightning.plugins.DDPPlugin
+    find_unused_parameters: no
