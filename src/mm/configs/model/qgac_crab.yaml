@@ -5,6 +5,7 @@ defaults:
 
 trainer:
   max_epochs: 200
+  replace_sampler_ddp: no
 
 net:
   learning_config:
