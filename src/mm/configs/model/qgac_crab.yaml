@@ -2,6 +2,7 @@
 defaults:
   - /data: varied_patch
   - /net: qgac_crab
+  - optional /overrides: qgac_crab
 
 trainer:
   max_epochs: 200

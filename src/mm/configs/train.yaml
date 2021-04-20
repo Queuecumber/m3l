@@ -1,5 +1,3 @@
 defaults:
   - experiment
   - model: ???
-  - optional overrides: ${model}
-  - override /hydra/launcher: submitit_slurm

@@ -2,6 +2,6 @@ _target_: mm.data.VariedPatch
 root_dir: ???
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${modpath:}/../stats/cstats.pt
+  root: ${mm.modpath:}/../stats/cstats.pt
 batch_size: 32
 num_workers: 1

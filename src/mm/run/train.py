@@ -1,7 +1,9 @@
 import hydra
 from hydra.utils import instantiate
 
-from .experiment import Experiment, ExperimentConfig
+from .configs import *
+from .experiment import Experiment
+from .resolvers import *
 
 
 @hydra.main(config_name="train", config_path="../configs")

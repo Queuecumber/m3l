@@ -6,6 +6,6 @@ defaults:
 _target_: mm.models.QGACCrab
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${modpath:}/../stats/cstats.pt
+  root: ${mm.modpath:}/../stats/cstats.pt
 
   
