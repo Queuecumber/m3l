@@ -1,16 +1,15 @@
 from types import SimpleNamespace
-from typing import Optional
+from typing import Optional, Sequence, Tuple
 
 import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
-from pytorch_lightning.loggers import CometLogger
-from pytorch_lightning.utilities import _module_available
 from torch import Tensor
 from torch.nn import ConvTranspose2d, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 from torchvision.transforms.functional import to_pil_image
@@ -158,7 +157,7 @@ class QGACCrab(pl.LightningModule):
         if hasattr(self.trainer.logger.experiment, "log_image"):
             self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
 
-    def configure_optimizers(self) -> Optimizer:
+    def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
         optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())
         scheduler = instantiate(self.learning_config.scheduler, optimizer=optimizer)
         return [optimizer], [scheduler]
