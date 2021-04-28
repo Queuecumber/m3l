@@ -1,4 +1,4 @@
-from random import randint, randrange
+from random import randrange
 from typing import Any, Mapping, Optional, Sequence, Tuple, Union
 
 import torch
@@ -7,6 +7,16 @@ from torch.utils.data import Dataset
 from torchjpeg.codec import quantize_at_quality
 from torchjpeg.dct import Stats, deblockify, images_to_batch, normalize
 from torchjpeg.quantization.ijg import quantization_max
+from torchtyping import TensorType
+
+CompressedImageData = Tuple[
+    TensorType["channels":1, "height", "width"],
+    Optional[TensorType["channels":2, "height", "width"]],
+    TensorType["channels":1, "block_height":8, "block_width":8],
+    Optional[TensorType["channels":1, "block_height":8, "block_width":8]],
+    Tensor,
+    Tensor,
+]
 
 
 class JPEGQuantizedDataset(Dataset):
