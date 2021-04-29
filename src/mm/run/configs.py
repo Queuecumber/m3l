@@ -4,12 +4,12 @@ from typing import Any, List, Optional
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
 
-defaults = [{"trainer": "lightning"}]
+experiment_defaults = [{"trainer": "lightning"}]
 
 
 @dataclass
 class ExperimentConfig:
-    defaults: List[Any] = field(default_factory=lambda: defaults)
+    defaults: List[Any] = field(default_factory=lambda: experiment_defaults)
 
     _target_: str = "mm.run.Experiment"
     data: Any = MISSING

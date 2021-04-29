@@ -1,11 +1,8 @@
 defaults:
-  - learning_config: base
-  - learning_config/optimizer: adam
-  - learning_config/scheduler: cosine_annealing
+  - optimizer: adam
+  - scheduler: cosine_annealing
 
 _target_: mm.models.QGACCrab
 stats: 
   _target_: torchjpeg.dct.Stats
   root: ${mm.modpath:}/../stats/cstats.pt
-
-  

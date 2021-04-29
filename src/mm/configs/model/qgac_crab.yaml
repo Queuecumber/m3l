@@ -9,11 +9,10 @@ trainer:
   replace_sampler_ddp: no
 
 net:
-  learning_config:
-    optimizer:
-      lr: 1e-4
-    scheduler:
-      eta_min: 1e-6
+  optimizer:
+    lr: 1e-4
+  scheduler:
+    eta_min: 1e-6
 
 name: qgac_crab
   

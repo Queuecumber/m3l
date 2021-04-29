@@ -1,12 +1,11 @@
-from types import SimpleNamespace
-from typing import Optional, Sequence, Tuple
+from typing import Callable, Iterator, Optional, Sequence, Tuple
 
 import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
 from torch import Tensor
-from torch.nn import ConvTranspose2d, PReLU, Sequential
+from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
@@ -23,10 +22,11 @@ class QGACCrab(pl.LightningModule):
     QGAC model from "Analysing and Mitigating Compression Defects in Deep Learning"
     """
 
-    def __init__(self, stats: Stats, learning_config: SimpleNamespace) -> None:
+    def __init__(self, stats: Stats, optimizer: Callable[[Iterator[Parameter]], Optimizer], scheduler: Callable[[Optimizer], _LRScheduler]) -> None:
         super(QGACCrab, self).__init__()
         self.stats = stats
-        self.learning_config = learning_config
+        self.optimizer = optimizer
+        self.scheduler = scheduler
 
         self.block_y = ConvolutionalFilterManifold(
             in_channels=1,
@@ -158,6 +158,6 @@ class QGACCrab(pl.LightningModule):
             self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
 
     def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
-        optimizer = instantiate(self.learning_config.optimizer, params=self.parameters())
-        scheduler = instantiate(self.learning_config.scheduler, optimizer=optimizer)
+        optimizer = self.optimizer(params=self.parameters())
+        scheduler = self.scheduler(optimizer=optimizer)
         return [optimizer], [scheduler]

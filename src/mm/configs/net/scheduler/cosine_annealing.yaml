@@ -1,0 +1,7 @@
+# https://github.com/facebookresearch/hydra/issues/1283
+defaults:
+  - /mm/partial@_here_
+
+_partial_: torch.optim.lr_scheduler.CosineAnnealingLR
+T_max: ${trainer.max_epochs}
+eta_min: ???
