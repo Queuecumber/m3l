@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import pytorch_lightning as pl
 import torch.jit
+from pytorch_lightning.utilities import _module_available
 
 
 @dataclass
@@ -12,6 +13,12 @@ class Experiment:
     name: str
 
     def fit(self) -> None:
+        if _module_available("comet_ml"):
+            # HACK: for some reason comet complains about not being imported first, this shuts it up
+            import comet_ml
+
+            comet_ml.monkey_patching._reset_already_imported_modules()
+
         self.trainer.fit(self.net, self.data)
 
         script = self.net.to_torchscript()
