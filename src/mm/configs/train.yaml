@@ -1,3 +1,8 @@
 defaults:
   - experiment
   - model: ???
+
+hydra:
+  searchpath:
+    - file:///etc/mm
+    - file://${oc.env:HOME}/.config/mm
