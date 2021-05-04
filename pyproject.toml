@@ -25,11 +25,6 @@ classifiers = [
     "Development Status :: 3 - Alpha"
 ]
 
-packages = [
-    { include = "mm", from = "src" },
-    { include = "hydra_plugins", from = "src" },
-]
-
 [tool.poetry.dependencies]
 python = ">= 3.7, < 4.0"
 pillow = "^8.0.1"
@@ -39,7 +34,7 @@ torchvision = "0.9.1"
 torchjpeg = "0.9.17"
 pytorch-lightning = "1.2.6"
 
-hydra-core = "1.1.0.dev5"
+hydra-core = "1.1.0.dev6"
 
 submitit = { version = "^1.2.1", optional = true }
 hydra-submitit-launcher = { version = "^1.1.0", optional = true }
