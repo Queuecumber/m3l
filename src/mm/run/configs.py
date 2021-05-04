@@ -16,6 +16,7 @@ class ExperimentConfig:
     net: Any = MISSING
     trainer: Any = MISSING
     name: str = MISSING
+    cluster: Any = None
 
 
 @dataclass

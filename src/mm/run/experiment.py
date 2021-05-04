@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 import pytorch_lightning as pl
 import torch.jit
@@ -11,6 +12,7 @@ class Experiment:
     net: pl.LightningModule
     trainer: pl.Trainer
     name: str
+    cluster: Any
 
     def fit(self) -> None:
         if _module_available("comet_ml"):
