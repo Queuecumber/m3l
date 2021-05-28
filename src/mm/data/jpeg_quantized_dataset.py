@@ -9,6 +9,8 @@ from torchjpeg.dct import Stats, deblockify, images_to_batch, normalize
 from torchjpeg.quantization.ijg import quantization_max
 from torchtyping import TensorType
 
+from .imagelist import ImageList
+
 CompressedImageData = Tuple[
     TensorType["channels":1, "height", "width"],
     Optional[TensorType["channels":2, "height", "width"]],
@@ -148,27 +150,24 @@ class JPEGQuantizedDataset(Dataset):
         )
 
 
-# def pad_coefficients_collate(batch_list):
-#     y_coefs = []
-#     cb_coefs = []
-#     cr_coefs = []
-#     gt_coefs = []
+def pad_coefficients_collate(batch_list):
+    y_coefs = []
+    cbcr_coefs = []
+    gt_coefs = []
 
-#     yqs = torch.stack([b[3] for b in batch_list])
-#     cqs = torch.stack([b[4] for b in batch_list])
-#     sizes = torch.stack([b[6] for b in batch_list])
+    yqs = torch.stack([b[2] for b in batch_list])
+    cqs = torch.stack([b[3] for b in batch_list])
+    sizes = torch.stack([b[5] for b in batch_list])
 
-#     labels = [b[7] for b in batch_list]
+    labels = [b[6] for b in batch_list]
 
-#     for b in batch_list:
-#         y_coefs.append(b[0])
-#         cb_coefs.append(b[1])
-#         cr_coefs.append(b[2])
-#         gt_coefs.append(b[5])
+    for b in batch_list:
+        y_coefs.append(b[0])
+        cbcr_coefs.append(b[1])
+        gt_coefs.append(b[4])
 
-#     y_coefs = ImageList.from_tensors(y_coefs).tensor
-#     cb_coefs = ImageList.from_tensors(cb_coefs).tensor
-#     cr_coefs = ImageList.from_tensors(cr_coefs).tensor
-#     gt_coefs = ImageList.from_tensors(gt_coefs).tensor
+    y_coefs = ImageList.from_tensors(y_coefs).tensor
+    cbcr_coefs = ImageList.from_tensors(cbcr_coefs).tensor
+    gt_coefs = ImageList.from_tensors(gt_coefs).tensor
 
-#     return y_coefs, cb_coefs, cr_coefs, yqs, cqs, gt_coefs, sizes, labels
+    return y_coefs, cbcr_coefs, yqs, cqs, gt_coefs, sizes, labels
