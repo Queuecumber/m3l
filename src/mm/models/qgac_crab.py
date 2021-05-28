@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
+from numpy import add
 from torch import Tensor
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
@@ -156,6 +157,28 @@ class QGACCrab(pl.LightningModule):
 
         if hasattr(self.trainer.logger.experiment, "log_image"):
             self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
+
+    def test_step(self, batch: QGACTrainingBatch, batch_idx: int, dataloader_idx: int):
+        y, cbcr, q_y, q_c, target, _, _ = batch
+
+        restored = self(q_y, y, q_c, cbcr)
+
+        target_spatial = batch_to_images(target, stats=self.stats)
+        restored_spatial = batch_to_images(restored, stats=self.stats)
+
+        psnr_e = psnr(restored_spatial, target_spatial).view(-1)
+        psnrb_e = psnrb(restored_spatial, target_spatial).view(-1)
+        ssim_e = ssim(restored_spatial, target_spatial).view(-1)
+
+        if self.trainer.datamodule is not None and hasattr(self.trainer.datamodule, "test_set_idx_map"):
+            ds_name, ds_quality = self.trainer.datamodule.test_set_idx_map[dataloader_idx]
+            prefix = f"test/{ds_name}"
+        else:
+            prefix = "test"
+
+        metrics = {f"{prefix}/psnr": psnr_e.cpu().numpy(), f"{prefix}/psnrb": psnrb_e.cpu().numpy(), f"{prefix}/ssim": ssim_e.cpu().numpy()}
+
+        self.logger.log_metrics(metrics, ds_quality)
 
     def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
         optimizer = self.optimizer(params=self.parameters())

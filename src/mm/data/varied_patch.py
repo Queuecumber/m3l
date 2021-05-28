@@ -1,8 +1,10 @@
 import logging
+import shutil
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 import pytorch_lightning as pl
+import torch.distributed
 from PIL import Image
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.dataset import ConcatDataset
@@ -11,7 +13,7 @@ from torchjpeg.dct import Stats
 from torchvision.transforms import ToTensor
 from torchvision.transforms.transforms import ColorJitter, Compose, RandomAffine, RandomCrop, RandomHorizontalFlip, RandomVerticalFlip
 
-from .jpeg_quantized_dataset import JPEGQuantizedDataset
+from .jpeg_quantized_dataset import JPEGQuantizedDataset, pad_coefficients_collate
 from .unlabeled_image_folder import UnlabeledImageFolder
 from .utils import copytree_progress
 
@@ -26,7 +28,17 @@ class VariedPatch(pl.LightningDataModule):
     `replace_sampler_ddp` to False in the pytorch lightning Trainer.
     """
 
-    def __init__(self, root_dir: Union[str, Path], stats: Stats, batch_size: int, num_workers: int, samples_total: Optional[int] = 14400, cache_dir: Union[str, Path] = None) -> None:
+    def __init__(
+        self,
+        root_dir: Union[str, Path],
+        stats: Stats,
+        train_batch_size: int,
+        num_workers: int,
+        val_batch_size: int = 1,
+        test_batch_size: int = 1,
+        samples_total: Optional[int] = 14400,
+        cache_dir: Union[str, Path] = None,
+    ) -> None:
         super().__init__()
 
         if isinstance(root_dir, str):
@@ -40,7 +52,10 @@ class VariedPatch(pl.LightningDataModule):
 
         self.stats = stats
 
-        self.batch_size = batch_size
+        self.train_batch_size = train_batch_size
+        self.val_batch_size = val_batch_size
+        self.test_batch_size = test_batch_size
+
         self.num_workers = num_workers
         self.samples_total = samples_total
 
@@ -61,6 +76,10 @@ class VariedPatch(pl.LightningDataModule):
                 copytree_progress(self.root_dir / "DIV2K", self.cache_dir / "DIV2K", desc="Cache training data (1/2)", dirs_exist_ok=True)
                 copytree_progress(self.root_dir / "Flickr2K" / "Flickr2K_HR", self.cache_dir / "Flickr2K" / "Flickr2K_HR", desc="Cache training data (2/2)", dirs_exist_ok=True)
                 copytree_progress(self.root_dir / "live1", self.cache_dir / "live1", desc="Cache val data", dirs_exist_ok=True)
+
+                copytree_progress(self.root_dir / "BSDS500", self.cache_dir / "BSDS500", desc="Cache test data (2/3)", dirs_exist_ok=True)
+                copytree_progress(self.root_dir / "ICB-RGB8", self.cache_dir / "ICB-RGB8", desc="Cache test data (3/3)", dirs_exist_ok=True)
+
             except Exception as e:
                 log.warning(e)
                 log.warning("Unable to copy to cache directory, using original as a fallback")
@@ -72,27 +91,50 @@ class VariedPatch(pl.LightningDataModule):
         else:
             target = self.root_dir
 
-        if stage == "fit" or stage is None:
+        if stage in ("fit", None):
             div2k = UnlabeledImageFolder(target / "DIV2K", transform=self.train_transforms)
             flickr2k = UnlabeledImageFolder(target / "Flickr2K" / "Flickr2K_HR", transform=self.train_transforms)
             self.patches = JPEGQuantizedDataset(ConcatDataset([div2k, flickr2k]), quality=(0, 100), stats=self.stats)
 
             self.live1 = JPEGQuantizedDataset(UnlabeledImageFolder(target / "live1", transform=ToTensor()), quality=10, stats=self.stats)
 
-        if stage == "test" or stage is None:
-            pass
+        if stage in ("test", None):
+            self.live1 = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "live1", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
+            self.bsds = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "BSDS500", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
+            self.icb = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "ICB-RGB8", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
 
-    def train_dataloader(self):
+    def train_dataloader(self) -> DataLoader:
         if self.samples_total is not None:
-            with_replacement_sampler = RandomSampler(self.patches, replacement=True, num_samples=self.samples_total)
+            sampler = RandomSampler(self.patches, replacement=True, num_samples=self.samples_total)
+        elif torch.distributed.is_available():
+            sampler = DistributedSampler(self.patches, shuffle=True)
         else:
-            with_replacement_sampler = None
+            sampler = RandomSampler(self.patches)
 
-        return DataLoader(self.patches, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True, sampler=with_replacement_sampler)
+        return DataLoader(self.patches, batch_size=self.train_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=sampler)
 
-    def val_dataloader(self):
-        # TODO make this work in non-distributed mode
-        if self.samples_total is not None:
+    def val_dataloader(self) -> DataLoader:
+        if torch.distributed.is_available():
             val_sampler = DistributedSampler(self.live1, shuffle=False)
+        else:
+            val_sampler = None
 
-        return DataLoader(self.live1, batch_size=1, num_workers=self.num_workers, pin_memory=True, sampler=val_sampler)
+        return DataLoader(self.live1, batch_size=self.val_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=val_sampler, collate_fn=pad_coefficients_collate)
+
+    def test_dataloader(self) -> Sequence[DataLoader]:
+        ds_seq = self.icb + self.live1 + self.bsds
+
+        self.test_set_idx_map = {i: (["ICB", "Live-1", "BSDS500"][i // 10], i % 10 * 10 + 10) for i in range(len(ds_seq))}
+
+        if torch.distributed.is_available():
+            samplers = [DistributedSampler(d, shuffle=False) for d in ds_seq]
+        else:
+            samplers = [None for _ in ds_seq]
+
+        dl_seq = [DataLoader(d, batch_size=self.test_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=s, collate_fn=pad_coefficients_collate) for d, s in zip(ds_seq, samplers)]
+        return dl_seq
+
+    def teardown(self, stage: Optional[str] = None):
+        if self.cache_dir is not None:
+            log.info(f"Removing cache dir {self.cache_dir}")
+            shutil.rmtree(self.cache_dir)

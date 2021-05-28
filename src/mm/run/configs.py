@@ -17,6 +17,7 @@ class ExperimentConfig:
     trainer: Any = MISSING
     name: str = MISSING
     cluster: Any = None
+    checkpoint: Optional[str] = None
 
 
 @dataclass

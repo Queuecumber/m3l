@@ -13,6 +13,7 @@ class Experiment:
     trainer: pl.Trainer
     name: str
     cluster: Any
+    checkpoint: str
 
     def fit(self) -> None:
         if _module_available("comet_ml"):
@@ -30,4 +31,9 @@ class Experiment:
             self.trainer.logger.experiment.log_model(self.name, f"{self.name}.pt")
 
     def test(self) -> None:
-        pass
+        if _module_available("comet_ml"):
+            import comet_ml
+
+            comet_ml.monkey_patching._reset_already_imported_modules()
+
+        self.trainer.test(self.net, datamodule=self.data)

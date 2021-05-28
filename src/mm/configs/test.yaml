@@ -1,0 +1,13 @@
+defaults:
+  - experiment
+  - model: ???
+
+checkpoint: ???
+
+trainer:
+  resume_from_checkpoint: ${checkpoint}
+
+hydra:
+  searchpath:
+    - file:///etc/mm
+    - file://${oc.env:HOME}/.config/mm
