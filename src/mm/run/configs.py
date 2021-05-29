@@ -34,6 +34,20 @@ class CometConfig:
     prefix: str = ""
 
 
+@dataclass
+class WandbConfig:
+    _target_: str = "pytorch_lightning.loggers.WandbLogger"
+    name: str = "${name}"
+    save_dir: str = "."
+    offline: Optional[bool] = None
+    id: Optional[str] = None
+    anonymous: Optional[bool] = None
+    project: Optional[str] = "mm"
+    log_model: Optional[bool] = None
+    prefix: Optional[str] = None
+
+
 cs = ConfigStore.instance()
 cs.store(name="experiment", node=ExperimentConfig, provider="mm")
 cs.store(group="logger", name="comet", package="trainer.logger", node=CometConfig, provider="mm")
+cs.store(group="logger", name="wandb", package="trainer.logger", node=WandbConfig, provider="mm")
