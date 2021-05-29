@@ -1,11 +1,10 @@
 defaults:
   - experiment
   - model: ???
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
 
 checkpoint: ???
-
-trainer:
-  resume_from_checkpoint: ${checkpoint}
 
 hydra:
   searchpath:
