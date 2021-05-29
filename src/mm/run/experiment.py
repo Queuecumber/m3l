@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 import pytorch_lightning as pl
 import torch.jit
@@ -13,7 +13,7 @@ class Experiment:
     trainer: pl.Trainer
     name: str
     cluster: Any
-    checkpoint: str
+    checkpoint: Optional[str]
 
     def fit(self) -> None:
         if _module_available("comet_ml"):
@@ -36,4 +36,6 @@ class Experiment:
 
             comet_ml.monkey_patching._reset_already_imported_modules()
 
+        ckpt = torch.load(self.checkpoint)
+        self.net.load_state_dict(ckpt["state_dict"])
         self.trainer.test(self.net, datamodule=self.data)
