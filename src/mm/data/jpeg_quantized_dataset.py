@@ -5,7 +5,7 @@ import torch
 from torch.functional import Tensor
 from torch.utils.data import Dataset
 from torchjpeg.codec import quantize_at_quality
-from torchjpeg.dct import Stats, deblockify, images_to_batch, normalize
+from torchjpeg.dct import Stats, deblockify, images_to_batch, normalize, pad_to_block_multiple
 from torchjpeg.quantization.ijg import quantization_max
 from torchtyping import TensorType
 
@@ -102,9 +102,8 @@ class JPEGQuantizedDataset(Dataset):
             labels = image
             image = image[self.dict_key]
 
-        s = torch.Tensor(list(image.shape))
-        p = (torch.ceil(s / self.mcu) * self.mcu - s).long()
-        image = torch.nn.functional.pad(image.unsqueeze(0), [0, p[2], 0, p[1]], "replicate").squeeze(0)
+        s = torch.as_tensor(image.shape)
+        image = pad_to_block_multiple(image)
 
         (
             _,
