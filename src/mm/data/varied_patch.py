@@ -122,9 +122,9 @@ class VariedPatch(pl.LightningDataModule):
         return DataLoader(self.live1, batch_size=self.val_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=val_sampler, collate_fn=pad_coefficients_collate)
 
     def test_dataloader(self) -> Sequence[DataLoader]:
-        ds_seq = self.icb + self.live1 + self.bsds
+        ds_seq = self.live1 + self.icb + self.bsds
 
-        self.test_set_idx_map = {i: (["ICB", "Live-1", "BSDS500"][i // 10], i % 10 * 10 + 10) for i in range(len(ds_seq))}
+        self.test_set_idx = sum([[(name, i) for i in range(10, 101, 10)] for name in ["Live-1", "ICB", "BSDS500"]], [])
 
         if torch.distributed.is_available():
             samplers = [DistributedSampler(d, shuffle=False) for d in ds_seq]

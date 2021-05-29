@@ -2,7 +2,6 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple
 
 import pytorch_lightning as pl
 import torch
-from hydra.utils import instantiate
 from mm.layers import RRDB, ConvolutionalFilterManifold
 from numpy import add
 from torch import Tensor
@@ -170,15 +169,9 @@ class QGACCrab(pl.LightningModule):
         psnrb_e = psnrb(restored_spatial, target_spatial).view(-1)
         ssim_e = ssim(restored_spatial, target_spatial).view(-1)
 
-        if self.trainer.datamodule is not None and hasattr(self.trainer.datamodule, "test_set_idx_map"):
-            ds_name, ds_quality = self.trainer.datamodule.test_set_idx_map[dataloader_idx]
-            prefix = f"test/{ds_name}"
-        else:
-            prefix = "test"
+        name, quality = self.trainer.datamodule.test_set_idx[dataloader_idx]
 
-        metrics = {f"{prefix}/psnr": psnr_e.cpu().numpy(), f"{prefix}/psnrb": psnrb_e.cpu().numpy(), f"{prefix}/ssim": ssim_e.cpu().numpy()}
-
-        self.logger.log_metrics(metrics, ds_quality)
+        self.log_dict({f"test/{name}/psnr": psnr_e, f"test/{name}/psnrb": psnrb_e, f"test/{name}/ssim": ssim_e, f"test/quality": quality}, on_step=True, on_epoch=False, add_dataloader_idx=False)
 
     def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
         optimizer = self.optimizer(params=self.parameters())
