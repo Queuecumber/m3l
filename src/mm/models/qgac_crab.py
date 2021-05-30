@@ -192,6 +192,21 @@ class QGACCrab(pl.LightningModule):
         for name, table in tables.items():
             self.logger.experiment.log({f"test/{name}": Table(columns=["PSNR", "PSNR-B", "SSIM", "Quality", "Dataset"], data=table)})
 
+    def predict_step(self, batch, batch_idx: int, dataloader_idx: Optional[int]) -> Tuple[Sequence[Tensor], Sequence[str]]:
+        y, cbcr, q_y, q_c, path, sizes = batch
+
+        restored = self(q_y, y, q_c, cbcr)
+
+        restored_spatial = batch_to_images(restored, stats=self.stats)
+        restored_seq = crop_batch(restored_spatial, sizes)
+
+        for r, p in zip(restored_seq, path):
+            from wandb.data_types import Image
+
+            self.logger.experiment.log({"correct/restored": Image(r.movedim(0, 2).cpu().numpy(), caption=str(p))})
+
+        return restored_seq, path
+
     def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
         optimizer = self.optimizer(params=self.parameters())
         scheduler = self.scheduler(optimizer=optimizer)

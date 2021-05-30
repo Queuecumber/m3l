@@ -2,6 +2,7 @@
 defaults:
   - /data: varied_patch
   - /net: qgac_crab
+  - /serializer: image_serializer
   - optional /overrides: qgac_crab
 
 trainer:

@@ -1,0 +1,12 @@
+defaults:
+  - experiment
+  - model: ???
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+checkpoint: ???
+
+hydra:
+  searchpath:
+    - file:///etc/mm
+    - file://${oc.env:HOME}/.config/mm

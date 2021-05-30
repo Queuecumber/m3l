@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from pathlib import Path
+from typing import Any, Callable, List, Optional
 
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
@@ -18,6 +19,16 @@ class ExperimentConfig:
     name: str = MISSING
     cluster: Any = None
     checkpoint: Optional[str] = None
+    serializer: Optional[Any] = None
+
+
+@dataclass
+class CorrectionConfig:
+    _target_: str = "mm.run.Correction"
+    path: Path = MISSING
+    net: Any = MISSING
+    name: str = MISSING
+    weights: Path = MISSING
 
 
 @dataclass

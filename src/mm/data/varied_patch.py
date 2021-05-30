@@ -1,3 +1,4 @@
+import collections.abc
 import logging
 import shutil
 from pathlib import Path
@@ -5,7 +6,7 @@ from typing import Optional, Sequence, Union
 
 import pytorch_lightning as pl
 import torch.distributed
-from PIL import Image
+from mm.data.folder_of_jpeg_dataset import FolderOfJpegDataset
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.dataset import ConcatDataset
 from torch.utils.data.distributed import DistributedSampler
@@ -13,7 +14,7 @@ from torchjpeg.dct import Stats
 from torchvision.transforms import ToTensor
 from torchvision.transforms.transforms import ColorJitter, Compose, RandomAffine, RandomCrop, RandomHorizontalFlip, RandomVerticalFlip
 
-from .jpeg_quantized_dataset import JPEGQuantizedDataset, pad_coefficients_collate
+from .jpeg_quantized_dataset import JPEGQuantizedDataset
 from .unlabeled_image_folder import UnlabeledImageFolder
 from .utils import copytree_progress
 
@@ -38,6 +39,8 @@ class VariedPatch(pl.LightningDataModule):
         test_batch_size: int = 1,
         samples_total: Optional[int] = 14400,
         cache_dir: Union[str, Path] = None,
+        correct_dir: Union[Sequence[Union[str, Path]], Union[str, Path]] = None,
+        correct_batch_size: int = 1,
     ) -> None:
         super().__init__()
 
@@ -47,14 +50,21 @@ class VariedPatch(pl.LightningDataModule):
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
 
+        if isinstance(correct_dir, str) or isinstance(correct_dir, Path):
+            correct_dir = [correct_dir]
+
+        correct_dir = [Path(c) if isinstance(correct_dir, str) else c for c in correct_dir]
+
         self.root_dir = root_dir
         self.cache_dir = cache_dir
+        self.correct_dir = correct_dir
 
         self.stats = stats
 
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.test_batch_size = test_batch_size
+        self.correct_batch_size = correct_batch_size
 
         self.num_workers = num_workers
         self.samples_total = samples_total
@@ -103,6 +113,10 @@ class VariedPatch(pl.LightningDataModule):
             self.bsds = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "BSDS500", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
             self.icb = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "ICB-RGB8", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
 
+        if stage == "predict":
+            assert self.correct_dir is not None, "No directory provided for correction"
+            self.correct = ConcatDataset([FolderOfJpegDataset(c, self.stats) for c in self.correct_dir])
+
     def train_dataloader(self) -> DataLoader:
         if self.samples_total is not None:
             sampler = RandomSampler(self.patches, replacement=True, num_samples=self.samples_total)
@@ -119,7 +133,7 @@ class VariedPatch(pl.LightningDataModule):
         else:
             val_sampler = None
 
-        return DataLoader(self.live1, batch_size=self.val_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=val_sampler, collate_fn=pad_coefficients_collate)
+        return DataLoader(self.live1, batch_size=self.val_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=val_sampler, collate_fn=JPEGQuantizedDataset.collate)
 
     def test_dataloader(self) -> Sequence[DataLoader]:
         ds_seq = self.live1 + self.icb + self.bsds
@@ -131,8 +145,11 @@ class VariedPatch(pl.LightningDataModule):
         else:
             samplers = [None for _ in ds_seq]
 
-        dl_seq = [DataLoader(d, batch_size=self.test_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=s, collate_fn=pad_coefficients_collate) for d, s in zip(ds_seq, samplers)]
+        dl_seq = [DataLoader(d, batch_size=self.test_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=s, collate_fn=JPEGQuantizedDataset.collate) for d, s in zip(ds_seq, samplers)]
         return dl_seq
+
+    def predict_dataloader(self) -> DataLoader:
+        return DataLoader(self.correct, batch_size=self.correct_batch_size, num_workers=self.num_workers, pin_memory=True, collate_fn=FolderOfJpegDataset.collate)
 
     def teardown(self, stage: Optional[str] = None):
         if self.cache_dir is not None:

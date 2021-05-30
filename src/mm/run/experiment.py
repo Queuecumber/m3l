@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import pytorch_lightning as pl
 import torch.jit
 from pytorch_lightning.utilities import _module_available
+from torchvision.io import write_png
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Experiment:
     name: str
     cluster: Any
     checkpoint: Optional[str]
+    serializer: Optional[Callable]
 
     def fit(self) -> None:
         if _module_available("comet_ml"):
@@ -36,6 +38,19 @@ class Experiment:
 
             comet_ml.monkey_patching._reset_already_imported_modules()
 
-        ckpt = torch.load(self.checkpoint)
+        ckpt = torch.load(self.checkpoint, map_location="cpu")
         self.net.load_state_dict(ckpt["state_dict"])
         self.trainer.test(self.net, datamodule=self.data)
+
+    def correct(self) -> None:
+        ckpt = torch.load(self.checkpoint, map_location="cpu")
+        self.net.load_state_dict(ckpt["state_dict"])
+
+        # TODO generalize
+        out_batches = self.trainer.predict(self.net, datamodule=self.data)
+
+        for b in out_batches:
+            images, paths = b
+
+            for i, p in zip(images, paths):
+                self.serializer(i, p)
