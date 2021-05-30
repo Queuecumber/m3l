@@ -8,12 +8,7 @@ from PIL import Image
 
 
 class UnlabeledImageFolder(torch.utils.data.Dataset):
-    def __init__(
-        self,
-        path: Union[str, Path],
-        extensions: Sequence[str] = [".bmp", ".png", ".jpg", ".ppm", ".pgm"],
-        transform: Optional[Callable] = None,
-    ) -> None:
+    def __init__(self, path: Union[str, Path], extensions: Sequence[str] = [".bmp", ".png", ".jpg", ".ppm", ".pgm"], transform: Optional[Callable] = None) -> None:
         if isinstance(path, str):
             path = Path(path)
 
