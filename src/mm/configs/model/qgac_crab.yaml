@@ -2,8 +2,8 @@
 defaults:
   - /data: varied_patch
   - /net: qgac_crab
-  - /serializer: image_serializer
   - optional /overrides: qgac_crab
+  - override /serializer: image_serializer
 
 trainer:
   max_epochs: 200
