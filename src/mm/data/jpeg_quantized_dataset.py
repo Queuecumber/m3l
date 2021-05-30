@@ -149,7 +149,7 @@ class JPEGQuantizedDataset(Dataset):
         )
 
 
-def pad_coefficients_collate(batch_list):
+def pad_coefficients_collate(batch_list: Sequence[Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Any]]) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Any]:
     y_coefs = []
     cbcr_coefs = []
     gt_coefs = []
@@ -170,3 +170,10 @@ def pad_coefficients_collate(batch_list):
     gt_coefs = ImageList.from_tensors(gt_coefs).tensor
 
     return y_coefs, cbcr_coefs, yqs, cqs, gt_coefs, sizes, labels
+
+
+def crop_batch(batch: Tensor, sizes: Sequence[Tensor]) -> Sequence[Tensor]:
+    """
+    TODO contribute this to torchjpeg
+    """
+    return [batch[i, :, : sizes[i, -2], : sizes[i, -1]] for i in range(len(batch))]

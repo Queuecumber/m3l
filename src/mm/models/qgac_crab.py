@@ -1,17 +1,17 @@
+from collections import defaultdict
 from typing import Callable, Iterator, Optional, Sequence, Tuple
 
 import pytorch_lightning as pl
 import torch
+from mm.data import crop_batch
 from mm.layers import RRDB, ConvolutionalFilterManifold
-from numpy import add
-from torch import Tensor
+from torch import Tensor, unsqueeze
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
-from torchvision.transforms.functional import to_pil_image
 
 from .qgac_base import QGACTrainingBatch
 from .weight_init import weight_init
@@ -27,6 +27,8 @@ class QGACCrab(pl.LightningModule):
         self.stats = stats
         self.optimizer = optimizer
         self.scheduler = scheduler
+
+        self.save_hyperparameters()
 
         self.block_y = ConvolutionalFilterManifold(
             in_channels=1,
@@ -131,47 +133,64 @@ class QGACCrab(pl.LightningModule):
         self.log("train/lr", self.optimizers().optimizer.param_groups[0]["lr"], prog_bar=True)
 
     def validation_step(self, batch: QGACTrainingBatch, batch_idx: int):
-        y, cbcr, q_y, q_c, target, _, _ = batch
+        y, cbcr, q_y, q_c, target, sizes, _ = batch
 
         restored = self(q_y, y, q_c, cbcr)
 
         target_spatial = batch_to_images(target, stats=self.stats)
         restored_spatial = batch_to_images(restored, stats=self.stats)
 
-        psnr_e = psnr(restored_spatial, target_spatial).view(-1)
-        psnrb_e = psnrb(restored_spatial, target_spatial).view(-1)
-        ssim_e = ssim(restored_spatial, target_spatial).view(-1)
+        target_seq = crop_batch(target_spatial, sizes)
+        restored_seq = crop_batch(restored_spatial, sizes)
+
+        psnr_e = torch.cat([psnr(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
+        psnrb_e = torch.cat([psnrb(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
+        ssim_e = torch.cat([ssim(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
 
         self.log("val/psnr", psnr_e, prog_bar=True, sync_dist=True)
         self.log("val/psnrb", psnrb_e, sync_dist=True)
         self.log("val/ssim", ssim_e, sync_dist=True)
 
         if batch_idx == 0:
-            return psnr_e, psnrb_e, ssim_e, restored_spatial
-        else:
-            return psnr_e, psnrb_e, ssim_e, None
+            from wandb.data_types import Image
 
-    def validation_epoch_end(self, validation_step_outputs):
-        _, _, _, restored_example = validation_step_outputs[0]
-
-        if hasattr(self.trainer.logger.experiment, "log_image"):
-            self.logger.experiment.log_image(to_pil_image(restored_example.squeeze(0)), name="val/restored", step=self.global_step or 0)
+            self.logger.experiment.log({"val/restored": Image(restored_seq[0].movedim(0, 2).cpu().numpy())})
 
     def test_step(self, batch: QGACTrainingBatch, batch_idx: int, dataloader_idx: int):
-        y, cbcr, q_y, q_c, target, _, _ = batch
+        y, cbcr, q_y, q_c, target, sizes, _ = batch
 
         restored = self(q_y, y, q_c, cbcr)
 
         target_spatial = batch_to_images(target, stats=self.stats)
         restored_spatial = batch_to_images(restored, stats=self.stats)
 
-        psnr_e = psnr(restored_spatial, target_spatial).view(-1)
-        psnrb_e = psnrb(restored_spatial, target_spatial).view(-1)
-        ssim_e = ssim(restored_spatial, target_spatial).view(-1)
+        target_seq = crop_batch(target_spatial, sizes)
+        restored_seq = crop_batch(restored_spatial, sizes)
 
-        name, quality = self.trainer.datamodule.test_set_idx[dataloader_idx]
+        psnr_e = torch.cat([psnr(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
+        psnrb_e = torch.cat([psnrb(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
+        ssim_e = torch.cat([ssim(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
 
-        self.log_dict({f"test/{name}/psnr": psnr_e, f"test/{name}/psnrb": psnrb_e, f"test/{name}/ssim": ssim_e, f"test/quality": quality}, on_step=True, on_epoch=False, add_dataloader_idx=False)
+        from wandb.data_types import Image
+
+        if batch_idx == 0:
+            name, quality = self.trainer.datamodule.test_set_idx[dataloader_idx]
+            caption = f"{name}, quality: {quality}"
+            self.logger.experiment.log({"test/examples": Image(restored_seq[0].movedim(0, 2).cpu().numpy(), caption=caption)})
+
+        return {"psnr": psnr_e, "psnrb": psnrb_e, "ssim": ssim_e}
+
+    def test_epoch_end(self, outputs) -> None:
+        from wandb.data_types import Table
+
+        tables = defaultdict(list)
+
+        for dso, (name, quality) in zip(outputs, self.trainer.datamodule.test_set_idx):
+            agg_metrics = [torch.cat([d[key] for d in dso]).mean().item() for key in dso[0].keys()] + [quality, name]
+            tables[name].append(agg_metrics)
+
+        for name, table in tables.items():
+            self.logger.experiment.log({f"test/{name}": Table(columns=["PSNR", "PSNR-B", "SSIM", "Quality", "Dataset"], data=table)})
 
     def configure_optimizers(self) -> Tuple[Sequence[Optimizer], Sequence[_LRScheduler]]:
         optimizer = self.optimizer(params=self.parameters())
