@@ -39,7 +39,7 @@ class VariedPatch(pl.LightningDataModule):
         test_batch_size: int = 1,
         samples_total: Optional[int] = 14400,
         cache_dir: Union[str, Path] = None,
-        correct_dir: Union[Sequence[Union[str, Path]], Union[str, Path]] = None,
+        correct_dir: Optional[Union[Sequence[Union[str, Path]], Union[str, Path]]] = None,
         correct_batch_size: int = 1,
     ) -> None:
         super().__init__()
@@ -50,10 +50,11 @@ class VariedPatch(pl.LightningDataModule):
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
 
-        if isinstance(correct_dir, str) or isinstance(correct_dir, Path):
-            correct_dir = [correct_dir]
+        if correct_dir is not None:
+            if isinstance(correct_dir, str) or isinstance(correct_dir, Path):
+                correct_dir = [correct_dir]
 
-        correct_dir = [Path(c) if isinstance(correct_dir, str) else c for c in correct_dir]
+            correct_dir = [Path(c) if isinstance(correct_dir, str) else c for c in correct_dir]
 
         self.root_dir = root_dir
         self.cache_dir = cache_dir
@@ -149,9 +150,14 @@ class VariedPatch(pl.LightningDataModule):
         return dl_seq
 
     def predict_dataloader(self) -> DataLoader:
-        return DataLoader(self.correct, batch_size=self.correct_batch_size, num_workers=self.num_workers, pin_memory=True, collate_fn=FolderOfJpegDataset.collate)
+        if torch.distributed.is_available():
+            cor_sampler = DistributedSampler(self.correct, shuffle=False)
+        else:
+            cor_sampler = None
 
-    def teardown(self, stage: Optional[str] = None):
+        return DataLoader(self.correct, batch_size=self.correct_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=cor_sampler, collate_fn=FolderOfJpegDataset.collate)
+
+    def teardown(self, stage: Optional[str] = None) -> None:
         if self.cache_dir is not None:
             log.info(f"Removing cache dir {self.cache_dir}")
             shutil.rmtree(self.cache_dir)

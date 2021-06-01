@@ -3,3 +3,5 @@ resume_from_checkpoint: ${checkpoint}
 plugins:
   - _target_: pytorch_lightning.plugins.DDPPlugin
     find_unused_parameters: no
+callbacks:
+  - _target_: mm.run.M3LProgress

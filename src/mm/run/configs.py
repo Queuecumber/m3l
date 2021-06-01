@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
 
-experiment_defaults = [{"trainer": "lightning"}]
+experiment_defaults = [{"trainer": "lightning"}, {"serializer": None}]
 
 
 @dataclass
