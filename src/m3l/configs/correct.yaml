@@ -1,13 +1,14 @@
 defaults:
   - experiment
+  - serializer: ???
   - model: ???
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
 
 checkpoint: ???
-job_type: test
+job_type: correct
 
 hydra:
   searchpath:
-    - file:///etc/mm
-    - file://${oc.env:HOME}/.config/mm
+    - file:///etc/m3l
+    - file://${oc.env:HOME}/.config/m3l

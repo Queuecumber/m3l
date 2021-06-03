@@ -2,7 +2,7 @@ defaults:
   - optimizer: adam
   - scheduler: cosine_annealing
 
-_target_: mm.models.QGACCrab
+_target_: m3l.models.QGACCrab
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${mm.modpath:}/../stats/cstats.pt
+  root: ${m3l.modpath:}/../stats/cstats.pt

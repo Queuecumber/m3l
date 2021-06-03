@@ -4,8 +4,8 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.distributed
-from mm.data import crop_batch
-from mm.layers import RRDB, ConvolutionalFilterManifold
+from m3l.data import crop_batch
+from m3l.layers import RRDB, ConvolutionalFilterManifold
 from torch import Tensor
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss

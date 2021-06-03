@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-from mm.layers import RRDB, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
+from m3l.layers import RRDB, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
 from torch import Tensor
 from torch.nn import Conv2d, ConvTranspose2d, Module, PReLU, Sequential
 from torchjpeg.dct import double_nn_dct
@@ -60,7 +60,7 @@ class QGACLite(pl.LightningModule):
 
             if hc == hy and wc == wy // 2:
                 c = self.block_resampler_422(self.block_enhancer_lr(c))
-                
+
             elif hc == hy // 2 and wc == wy // 2:
                 c = self.block_resampler_420(self.block_enhancer_lr(c))
 

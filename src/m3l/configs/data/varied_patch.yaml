@@ -1,7 +1,7 @@
-_target_: mm.data.VariedPatch
+_target_: m3l.data.VariedPatch
 root_dir: ???
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${mm.modpath:}/../stats/cstats.pt
+  root: ${m3l.modpath:}/../stats/cstats.pt
 train_batch_size: 32
 num_workers: 1

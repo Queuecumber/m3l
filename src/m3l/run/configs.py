@@ -12,7 +12,7 @@ experiment_defaults = [{"trainer": "lightning"}, {"serializer": None}]
 class ExperimentConfig:
     defaults: List[Any] = field(default_factory=lambda: experiment_defaults)
 
-    _target_: str = "mm.run.Experiment"
+    _target_: str = "m3l.run.Experiment"
     data: Any = MISSING
     net: Any = MISSING
     trainer: Any = MISSING
@@ -25,7 +25,7 @@ class ExperimentConfig:
 
 @dataclass
 class CorrectionConfig:
-    _target_: str = "mm.run.Correction"
+    _target_: str = "m3l.run.Correction"
     path: Path = MISSING
     net: Any = MISSING
     name: str = MISSING
@@ -37,7 +37,7 @@ class CometConfig:
     _target_: str = "pytorch_lightning.loggers.CometLogger"
     api_key: str = MISSING
     save_dir: str = "."
-    project_name: Optional[str] = "mm"
+    project_name: Optional[str] = "m3l"
     workspace: Optional[str] = None
     rest_api_key: Optional[str] = None
     experiment_name: str = "${name}"
@@ -54,13 +54,13 @@ class WandbConfig:
     offline: Optional[bool] = None
     id: Optional[str] = None
     anonymous: Optional[bool] = None
-    project: Optional[str] = "mm"
+    project: Optional[str] = "m3l"
     log_model: Optional[bool] = None
     prefix: Optional[str] = None
     job_type: Optional[str] = "${job_type}"
 
 
 cs = ConfigStore.instance()
-cs.store(name="experiment", node=ExperimentConfig, provider="mm")
-cs.store(group="logger", name="comet", package="trainer.logger", node=CometConfig, provider="mm")
-cs.store(group="logger", name="wandb", package="trainer.logger", node=WandbConfig, provider="mm")
+cs.store(name="experiment", node=ExperimentConfig, provider="m3l")
+cs.store(group="logger", name="comet", package="trainer.logger", node=CometConfig, provider="m3l")
+cs.store(group="logger", name="wandb", package="trainer.logger", node=WandbConfig, provider="m3l")

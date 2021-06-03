@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "mm"
+name = "m3l"
 version = "0.0.0" 
-description = "Multimedia Enhancement and Correction "
+description = "MultiMedia and Machine Learning"
 authors = [
     "Max Ehrlich"
 ]

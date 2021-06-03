@@ -6,7 +6,7 @@ from typing import Optional, Sequence, Union
 
 import pytorch_lightning as pl
 import torch.distributed
-from mm.data.folder_of_jpeg_dataset import FolderOfJpegDataset
+from m3l.data.folder_of_jpeg_dataset import FolderOfJpegDataset
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.dataset import ConcatDataset
 from torch.utils.data.distributed import DistributedSampler

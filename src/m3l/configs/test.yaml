@@ -4,9 +4,10 @@ defaults:
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
 
-job_type: train
+checkpoint: ???
+job_type: test
 
 hydra:
   searchpath:
-    - file:///etc/mm
-    - file://${oc.env:HOME}/.config/mm
+    - file:///etc/m3l
+    - file://${oc.env:HOME}/.config/m3l

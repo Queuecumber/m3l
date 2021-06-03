@@ -23,8 +23,8 @@ from pathlib import Path
 
 import hydra
 import pytorch_lightning as pl
-from mm.data import ColorPatch
-from mm.models import QGAC
+from m3l.data import ColorPatch
+from m3l.models import QGAC
 from omegaconf import DictConfig
 from torchjpeg.dct import Stats
 
