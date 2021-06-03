@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-from m3l.layers import RRDB, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
+from m3l.layers import RRDB  # TODO, ChannelwiseAttention, ChannelwiseThenSpatialAttention, ConvolutionalFilterManifold, JointAttention, SpatialAttention, SpatialThenChannelwiseAttention
 from torch import Tensor
 from torch.nn import Conv2d, ConvTranspose2d, Module, PReLU, Sequential
 from torchjpeg.dct import double_nn_dct
@@ -30,18 +30,18 @@ class QGACLite(pl.LightningModule):
 
             self.block_guide = ConvolutionalFilterManifold(in_channels=1, out_channels=32, kernel_size=8, stride=8, post_activation=PReLU())
 
-            if attentionType == "spatial":
-                self.attention = SpatialAttention(64)
-            elif attentionType == "channelwise":
-                self.attention = ChannelwiseAttention(64)
-            elif attentionType == "joint":
-                self.attention = JointAttention(64)
-            elif attentionType == "spatialThenChannelwise":
-                self.attention = SpatialThenChannelwiseAttention(64)
-            elif attentionType == "channelwiseThenSpatial":
-                self.attention = ChannelwiseThenSpatialAttention(64)
-            else:
-                self.attention = None
+            # if attentionType == "spatial":
+            #     self.attention = SpatialAttention(64)
+            # elif attentionType == "channelwise":
+            #     self.attention = ChannelwiseAttention(64)
+            # elif attentionType == "joint":
+            #     self.attention = JointAttention(64)
+            # elif attentionType == "spatialThenChannelwise":
+            #     self.attention = SpatialThenChannelwiseAttention(64)
+            # elif attentionType == "channelwiseThenSpatial":
+            #     self.attention = ChannelwiseThenSpatialAttention(64)
+            # else:
+            #     self.attention = None
 
             self.block_enhancer_hr = RRDB(kernel_size=3, channels=64, padding=1)
 
@@ -67,8 +67,8 @@ class QGACLite(pl.LightningModule):
             y_blocks = self.block_guide(q_y, y)
             c = torch.cat([y_blocks, c], dim=1)
 
-            if self.attention is not None:
-                c = self.attention(c)
+            # if self.attention is not None:
+            #     c = self.attention(c)
 
             c = self.unblock_c(q_c, self.block_enhancer_hr(c))
 
