@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch
 import torch.distributed
 from m3l.data import crop_batch
-from m3l.layers import RRDB, ConvolutionalFilterManifold
+from m3l.models.layers import RRDB, ConvolutionalFilterManifold
 from torch import Tensor
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
@@ -14,9 +14,9 @@ from torch.optim.lr_scheduler import _LRScheduler
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 
-from .loghelper import LogHelper
+from ..loghelper import LogHelper
+from ..weight_init import weight_init
 from .qgac_base import QGACTrainingBatch
-from .weight_init import weight_init
 
 
 class QGACCrab(LogHelper, pl.LightningModule):
