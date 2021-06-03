@@ -176,4 +176,4 @@ This will request 4 GPUs and submit your job to slurm, it will tell you the job'
 
 ## Adding a Model/Dataset to M3L
 
-Adding to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. 
+Adding to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. There are no code quality checks currently but your imports should be sorted (isort) and style should be conforming (black). Use type annotations whenever possible.
