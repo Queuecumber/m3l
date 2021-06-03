@@ -15,6 +15,7 @@ class Experiment:
     cluster: Any
     checkpoint: Optional[str]
     serializer: Optional[Callable]
+    job_type: Optional[str]
 
     def fit(self) -> None:
         if _module_available("comet_ml"):

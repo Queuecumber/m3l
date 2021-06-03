@@ -6,6 +6,7 @@ defaults:
   - override hydra/hydra_logging: colorlog
 
 checkpoint: ???
+job_type: correct
 
 hydra:
   searchpath:

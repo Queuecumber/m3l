@@ -17,6 +17,7 @@ class ExperimentConfig:
     net: Any = MISSING
     trainer: Any = MISSING
     name: str = MISSING
+    job_type: Optional[str] = None
     cluster: Any = None
     checkpoint: Optional[str] = None
     serializer: Optional[Any] = None
@@ -56,6 +57,7 @@ class WandbConfig:
     project: Optional[str] = "mm"
     log_model: Optional[bool] = None
     prefix: Optional[str] = None
+    job_type: Optional[str] = "${job_type}"
 
 
 cs = ConfigStore.instance()
