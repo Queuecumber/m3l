@@ -8,7 +8,7 @@ This is pre-alpha code with no version numbers. The following sparse documentati
 
 At a high level the project is using python with pytorch powering the machine-learning side.
 
-The number one goal of this project is to minimize the amoint of boilerplate and systems-level programming both inside the library itself and for end-users. It is often tricky to solve these engineering problems and there are high quality purpose built libraries for almost everything in python these days. This also makes the code smaller and therefore easily maintainable. If we develop something we need for the project and it seems like it isn't directly related, it should either be spun off into its own library or contributed to another project (see torchjpeg for an example of that).
+The number one goal of this project is to minimize the amount of boilerplate and systems-level programming both inside the library itself and for end-users. It is often tricky to solve these engineering problems and there are high quality purpose built libraries for almost everything in python these days. This also makes the code smaller and therefore easily maintainable. If we develop something we need for the project and it seems like it isn't directly related, it should either be spun off into its own library or contributed to another project (see torchjpeg for an example of that). 
 
 To that end, we are *prescribing* the following libraries (i.e., they are mandatory) 
 
@@ -31,6 +31,36 @@ By recommending we mean that code that is part of the project will be designed t
 * Optional torchscript models for production deployments with minimal dependencies
 * Hyperparameter sweeps with optuna
 * torchhub for pre-trained weights
+
+## Installing
+
+You need python > 3.7
+
+It's not on pypi for now, to install it you need permission to access the repository. 
+
+To install it as an end user:
+
+`pip install "m3l[slurm,wandb] @ git+ssh://git@github.com/Queuecumber/m3l.git"`
+
+Note that this also installs slurm cluster support and wanb logging (more on that later). If you don't want all of that, adjust the install arguments accordingly. 
+
+To install as a developer:
+
+You need poetry (`pip install --user poetry`), clone the repo and cd into it, then run
+
+`poetry install`
+
+this will give you an editable installation so you don't need to reinstall everytime you change something.
+
+## Repository Organization
+
+Source code is in `src/m3l`, 
+
+* configs - folder containing built in hydra configs (yaml files)
+* data - all code for datasets, datamodules, serializers, and anything else data related
+* models - all model code including shared layers and utilities
+* run - runnable scripts and related machinery
+* stats - per-frequency per-channel DCT coefficient statistics in the format expected by torchjpeg
 
 ## Optimizing Your Own Model
 
