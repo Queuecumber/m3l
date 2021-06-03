@@ -172,8 +172,8 @@ Assuming this file is saved as `<config dir>/cluster/vulcan.yaml`, launch distri
 
 `python -m m3l.run.train model=my_model cluster=vulcan trainer.gpus=4`
 
-This will request 4 GPUs and run your job, it will tell you the jobs directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
+This will request 4 GPUs and submit your job to slurm, it will tell you the job's directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
 
-## Adding a model to M3L
+## Adding a Model/Dataset to M3L
 
-Adding a model to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. 
+Adding to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. 
