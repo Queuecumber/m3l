@@ -114,6 +114,8 @@ class VariedPatch(pl.LightningDataModule):
             self.bsds = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "BSDS500", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
             self.icb = [JPEGQuantizedDataset(UnlabeledImageFolder(target / "ICB-RGB8", transform=ToTensor()), quality=q, stats=self.stats) for q in range(10, 101, 10)]
 
+            self.test_set_idx = sum([[(name, i) for i in range(10, 101, 10)] for name in ["Live-1", "ICB", "BSDS500"]], [])
+
         if stage == "predict":
             assert self.correct_dir is not None, "No directory provided for correction"
             self.correct = ConcatDataset([FolderOfJpegDataset(c, self.stats) for c in self.correct_dir])
@@ -131,6 +133,9 @@ class VariedPatch(pl.LightningDataModule):
     def val_dataloader(self) -> DataLoader:
         if torch.distributed.is_available():
             val_sampler = DistributedSampler(self.live1, shuffle=False)
+
+            if self.trainer.accelerator_connector.gpus > 1:
+                log.warn("Validation on multiple GPUs will produce slightly different results than single GPU.")
         else:
             val_sampler = None
 
@@ -139,14 +144,12 @@ class VariedPatch(pl.LightningDataModule):
     def test_dataloader(self) -> Sequence[DataLoader]:
         ds_seq = self.live1 + self.icb + self.bsds
 
-        self.test_set_idx = sum([[(name, i) for i in range(10, 101, 10)] for name in ["Live-1", "ICB", "BSDS500"]], [])
+        if torch.distributed.is_available() and self.trainer.accelerator_connector.gpus > 1:
+            log.error(
+                f"Testing on multiple GPUs is unsupported and causes incorrect results. To ensure metric correctness, the full test set will be evaluated on all {self.trainer.accelerator_connector.gpus} gpus instead of being split as intended."
+            )
 
-        if torch.distributed.is_available():
-            samplers = [DistributedSampler(d, shuffle=False) for d in ds_seq]
-        else:
-            samplers = [None for _ in ds_seq]
-
-        dl_seq = [DataLoader(d, batch_size=self.test_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=s, collate_fn=JPEGQuantizedDataset.collate) for d, s in zip(ds_seq, samplers)]
+        dl_seq = [DataLoader(d, batch_size=self.test_batch_size, num_workers=self.num_workers, pin_memory=True, collate_fn=JPEGQuantizedDataset.collate) for d in ds_seq]
         return dl_seq
 
     def predict_dataloader(self) -> DataLoader:
@@ -158,6 +161,6 @@ class VariedPatch(pl.LightningDataModule):
         return DataLoader(self.correct, batch_size=self.correct_batch_size, num_workers=self.num_workers, pin_memory=True, sampler=cor_sampler, collate_fn=FolderOfJpegDataset.collate)
 
     def teardown(self, stage: Optional[str] = None) -> None:
-        if self.cache_dir is not None:
+        if self.trainer.local_rank == 0 and self.cache_dir is not None:
             log.info(f"Removing cache dir {self.cache_dir}")
             shutil.rmtree(self.cache_dir)
