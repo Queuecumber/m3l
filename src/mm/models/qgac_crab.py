@@ -3,9 +3,10 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple
 
 import pytorch_lightning as pl
 import torch
+import torch.distributed
 from mm.data import crop_batch
 from mm.layers import RRDB, ConvolutionalFilterManifold
-from torch import Tensor, unsqueeze
+from torch import Tensor
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
@@ -13,11 +14,12 @@ from torch.optim.lr_scheduler import _LRScheduler
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 
+from .loghelper import LogHelper
 from .qgac_base import QGACTrainingBatch
 from .weight_init import weight_init
 
 
-class QGACCrab(pl.LightningModule):
+class QGACCrab(LogHelper, pl.LightningModule):
     """
     QGAC model from "Analysing and Mitigating Compression Defects in Deep Learning"
     """
@@ -152,9 +154,7 @@ class QGACCrab(pl.LightningModule):
         self.log("val/ssim", ssim_e, sync_dist=True)
 
         if batch_idx == 0:
-            from wandb.data_types import Image
-
-            self.logger.experiment.log({"val/restored": Image(restored_seq[0].movedim(0, 2).cpu().numpy())})
+            self.log_image("val/restored", restored_seq[0])
 
     def test_step(self, batch: QGACTrainingBatch, batch_idx: int, dataloader_idx: int):
         y, cbcr, q_y, q_c, target, sizes, _ = batch
@@ -171,26 +171,29 @@ class QGACCrab(pl.LightningModule):
         psnrb_e = torch.cat([psnrb(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
         ssim_e = torch.cat([ssim(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
 
-        from wandb.data_types import Image
-
         if batch_idx == 0:
             name, quality = self.trainer.datamodule.test_set_idx[dataloader_idx]
-            caption = f"{name}, quality: {quality}"
-            self.logger.experiment.log({"test/examples": Image(restored_seq[0].movedim(0, 2).cpu().numpy(), caption=caption)})
+            self.log_image("test/examples", restored_seq[0], caption=f"{name}, quality: {quality}")
 
-        return {"psnr": psnr_e, "psnrb": psnrb_e, "ssim": ssim_e}
+        output = {"psnr": psnr_e, "psnrb": psnrb_e, "ssim": ssim_e}
+
+        return output
 
     def test_epoch_end(self, outputs) -> None:
-        from wandb.data_types import Table
+        from pandas import DataFrame
 
-        tables = defaultdict(list)
+        columns = ["Dataset", "Quality", "PSNR", "PSNR-B", "SSIM"]
+
+        tables = defaultdict(lambda: DataFrame(columns=columns))
 
         for dso, (name, quality) in zip(outputs, self.trainer.datamodule.test_set_idx):
-            agg_metrics = [torch.cat([d[key] for d in dso]).mean().item() for key in dso[0].keys()] + [quality, name]
-            tables[name].append(agg_metrics)
+            row = [name, quality] + [torch.cat([d[key] for d in dso]).mean().item() for key in dso[0].keys()]
+            tables[name] = tables[name].append(DataFrame([row], columns=columns))
+
+        print(tables)
 
         for name, table in tables.items():
-            self.logger.experiment.log({f"test/{name}": Table(columns=["PSNR", "PSNR-B", "SSIM", "Quality", "Dataset"], data=table)})
+            self.log_table(f"test/{name}", table)
 
     def predict_step(self, batch, batch_idx: int, dataloader_idx: Optional[int]) -> Tuple[Sequence[Tensor], Sequence[str]]:
         y, cbcr, q_y, q_c, path, sizes = batch
@@ -201,9 +204,7 @@ class QGACCrab(pl.LightningModule):
         restored_seq = crop_batch(restored_spatial, sizes)
 
         for r, p in zip(restored_seq, path):
-            from wandb.data_types import Image
-
-            self.logger.experiment.log({"correct/restored": Image(r.movedim(0, 2).cpu().numpy(), caption=str(p))})
+            self.log_image("correct/restored", r, caption=p)
 
         return restored_seq, path
 
