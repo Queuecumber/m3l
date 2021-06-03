@@ -23,7 +23,7 @@ We are also *recommending* the following libraries
 * WandB for experiment tracking and lifecycle management (can be replaced by any logger pytorch-lightning supports)
 * torchhub for pretrained weights
 
-By recommending we mean that code that is part of the project will be designed to use these librarie. Although it should not crash if presented with an alternative, it may not work completely. End-user model/dataset code that uses alternative libraries with M3L used to do the training/evaluations should work as expected. 
+By recommending we mean that code that is part of the project will be designed to use these libraries. Although it should not crash if presented with an alternative, it may not work completely. End-user model/dataset code that uses alternative libraries (with M3L used to do the training/evaluations) should work as expected. 
 
 ## Long Term Goals
 
@@ -38,7 +38,7 @@ Define your model in a LightningModule (see lightning docs)
 
 Define your dataset in a LightningDataModule (see lightning docs) or use a built-in dataset. M3L uses `predict_dataloader` for correction, so make sure to define that along with a parameter like `correct_dir` that allows you to pass an input directory. If you just want to do trainig/evaluations then you don't need this.
 
-Configure m3l, it uses `~/.config/m3l` or `/etc/m3l`:
+Configure m3l, it uses the `~/.config/m3l` or `/etc/m3l` directories:
 
 The network config (`<config_dir>/net`) tells m3l how to instantiate your network, here's a template:
 
@@ -76,7 +76,7 @@ trainer:
 name: my_network  # name of your model (used for logging)
 ```
 
-Note that `# @package _global_` on the first line is mandatory. You can override pretty much anything that M3L does with the above model defintion. For example you can override properties of the network, the trainer (see pytorch lightning) the dataset, or even hydra internals. 
+Note that `# @package _global_` on the first line is mandatory. You can override pretty much anything that M3L does with the above model defintion. For example you can override properties of the network, the trainer (see pytorch lightning), the dataset, or even hydra internals. 
 
 Next, train your model. Make sure `PYTHONPATH` is set correctly so that M3L can find your code before doing this. 
 
@@ -170,10 +170,37 @@ This config automatically scales the number of GPUs and memory based on the numb
 
 Assuming this file is saved as `<config dir>/cluster/vulcan.yaml`, launch distributed training (on the **submission node** as follows)
 
-`python -m m3l.run.train model=my_model cluster=vulcan trainer.gpus=4`
+`python -m m3l.run.train --multirun model=my_model cluster=vulcan trainer.gpus=4`
 
-This will request 4 GPUs and submit your job to slurm, it will tell you the job's directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
+Note the `--multirun` argument. This will request 4 GPUs and submit your job to slurm, it will tell you the job's directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
 
 ## Adding a Model/Dataset to M3L
 
-Adding to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. There are no code quality checks currently but your imports should be sorted (isort) and style should be conforming (black). Use type annotations whenever possible.
+Adding to M3L is pretty much the same process as the Own Code section except you put your model in the repository `models/`, your dataset at `data/`, and your configs in `configs/`. The biggest difference is that your model should support an `override` package. Here's an example from the `qgac_crab` model:
+
+```
+# @package _global_
+defaults:
+  - /data: varied_patch
+  - /net: qgac_crab
+  - optional /overrides: qgac_crab
+  ...
+```
+
+Note the `optional /overrides: qgac_crab` default. This allows users to override any settings by making a file in `<config dir>/overrides` named `qgac_crab.yaml` that overrides any aspect of M3L as they need for their personal setup. This config file will be automatically loaded without the user needing to do anything if that defaults line is in the model config. For example, my `overrides/qgac_crab.yaml` looks like this:
+
+```
+# @package _global_
+defaults:
+    - /cluster: vulcan
+    - /logger: wandb
+
+trainer:
+  accelerator: ddp
+  gpus: 4
+  ```
+
+among other things, which automatically makes sure wandb and the vulcan cluster are loaded and that I request 4 GPUs by default. 
+
+
+Aside from that, verify that the model works with WandB and slurm (and anything other recommended libraries). For now there's no process around pre-trained weights. There are no code quality checks currently but your imports should be sorted (isort) and style should be conforming (black). Use type annotations whenever possible.
