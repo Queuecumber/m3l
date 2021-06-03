@@ -11,7 +11,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 
-from ..weight_init import weight_init
+from ..weight_init import small_weight_init
 from .qgac_base import QGACTrainingBatch
 
 
@@ -114,7 +114,7 @@ class QGAC(pl.LightningModule):
         if color:
             self.color_net = ColorRestore(channels=64, n_layers=1)
 
-        self.apply(lambda m: weight_init(scale=0.1, m=m))
+        self.apply(lambda m: small_weight_init(scale=0.1, m=m))
 
     def __y_net(self, q_y: Tensor, y: Tensor) -> Tensor:
         blocks_e = self.blocks_encode(q_y, y)

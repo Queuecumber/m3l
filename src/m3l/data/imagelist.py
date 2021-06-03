@@ -7,7 +7,7 @@ import torch
 from torch.nn import functional as F
 
 
-# The only change over detectron2 is how padding is applied, we need to preserve gradient when applying padding
+# The only change over detectron2 is how padding is applied
 class ImageList(object):
     """
     Structure that holds a list of images (of possibly
@@ -17,6 +17,8 @@ class ImageList(object):
 
     Attributes:
         image_sizes (list[tuple[int, int]]): each tuple is (h, w)
+
+    TODO contribute to torchjpeg
     """
 
     def __init__(self, tensor: torch.Tensor, image_sizes: List[Tuple[int, int]]):

@@ -47,6 +47,8 @@ class JPEGQuantizedDataset(Dataset):
         image_key (optional str): The key to use to extract the image from a dataset which returns a mapping.
         deterministic_quality (bool): False by default, set to True to include the quality range in the dataset size. In other words, the length of this dataset will be `len(quality_range) * len(dataset)` and all the qualities in the range will
             be represented for every image by interating this dataset.
+
+    TODO contribute to torchjpeg
     """
 
     def __init__(self, dataset: Dataset, quality: Union[int, Sequence[int]], stats: Stats, mcu: int = 16, image_key: Optional[str] = None, deterministic_quality: bool = False) -> None:

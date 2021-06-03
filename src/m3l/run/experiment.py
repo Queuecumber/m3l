@@ -30,18 +30,13 @@ class Experiment:
             self.trainer.logger.experiment.log_artifact(artifact)
 
     def test(self) -> None:
-        ckpt = torch.load(self.checkpoint, map_location="cpu")
-        self.net.load_state_dict(ckpt["state_dict"])
+        self.net = type(self.net).load_from_checkpoint(self.checkpoint, map_location="cpu")
         self.trainer.test(self.net, datamodule=self.data)
 
     def correct(self) -> None:
-        ckpt = torch.load(self.checkpoint, map_location="cpu")
-        self.net.load_state_dict(ckpt["state_dict"])
+        self.net = type(self.net).load_from_checkpoint(self.checkpoint, map_location="cpu")
 
         out_batches = self.trainer.predict(self.net, datamodule=self.data)
 
         for b in out_batches:
-            images, paths = b
-
-            for i, p in zip(images, paths):
-                self.serializer(i, p)
+            self.serializer(b)

@@ -24,29 +24,6 @@ class ExperimentConfig:
 
 
 @dataclass
-class CorrectionConfig:
-    _target_: str = "m3l.run.Correction"
-    path: Path = MISSING
-    net: Any = MISSING
-    name: str = MISSING
-    weights: Path = MISSING
-
-
-@dataclass
-class CometConfig:
-    _target_: str = "pytorch_lightning.loggers.CometLogger"
-    api_key: str = MISSING
-    save_dir: str = "."
-    project_name: Optional[str] = "m3l"
-    workspace: Optional[str] = None
-    rest_api_key: Optional[str] = None
-    experiment_name: str = "${name}"
-    experiment_key: Optional[str] = None
-    offline: bool = False
-    prefix: str = ""
-
-
-@dataclass
 class WandbConfig:
     _target_: str = "pytorch_lightning.loggers.WandbLogger"
     name: str = "${name}"
@@ -62,5 +39,4 @@ class WandbConfig:
 
 cs = ConfigStore.instance()
 cs.store(name="experiment", node=ExperimentConfig, provider="m3l")
-cs.store(group="logger", name="comet", package="trainer.logger", node=CometConfig, provider="m3l")
 cs.store(group="logger", name="wandb", package="trainer.logger", node=WandbConfig, provider="m3l")

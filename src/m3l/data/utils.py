@@ -10,6 +10,9 @@ from tqdm import tqdm
 def copytree_progress(
     src: Union[Path, str], dst: Union[Path, str], desc: str = None, recopy=False, symlinks=False, ignore=None, copy_function=shutil.copy2, ignore_dangling_symlinks=False, dirs_exist_ok=False
 ):
+    """
+    TODO it would be great to get rid of this
+    """
     if isinstance(src, str):
         src = Path(src)
 

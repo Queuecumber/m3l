@@ -52,6 +52,7 @@ av = "^8.0.3"
 black = "^20.8b1"
 isort = "^5.6.4"
 pylint = "^2.6.0"
+rope = "^0.19.0"
 
 [tool.poetry.extras]
 slurm = ["submitit", "hydra-submitit-launcher"]

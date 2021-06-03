@@ -11,6 +11,10 @@ from .imagelist import ImageList
 
 
 class FolderOfJpegDataset(torch.utils.data.Dataset):
+    """
+    TODO contribute to torchjpeg
+    """
+
     def __init__(self, path: Union[str, Path], stats: Stats, extensions: Sequence[str] = [".jpg", ".jpeg", ".JPEG"]):
         if isinstance(path, str):
             path = Path(path)
@@ -61,7 +65,7 @@ class FolderOfJpegDataset(torch.utils.data.Dataset):
             cbcr_dequantized = torch.empty(0)
             c_q = torch.empty(0)
 
-        return y_dequantized.squeeze(0), cbcr_dequantized.squeeze(0), y_q.unsqueeze(0), c_q.unsqueeze(0), image, dim[0]
+        return y_dequantized.squeeze(0), cbcr_dequantized.squeeze(0), y_q.unsqueeze(0), c_q.unsqueeze(0), image.relative_to(self.path), dim[0]
 
     @staticmethod
     def collate(batch_list: Sequence[Tuple[Tensor, Tensor, Tensor, Tensor, Path, Tensor]]) -> Tuple[Tensor, Tensor, Tensor, Tensor, Sequence[Path], Tensor]:

@@ -10,6 +10,10 @@ log = logging.getLogger(__name__)
 
 
 class LogHelper:
+    """
+    TODO contribute to pytorch lightning logger class
+    """
+
     def log_image(self, key: str, image: Tensor, caption: Optional[str] = None) -> None:
         if len(image.shape) == 3:
             im = make_grid(image)

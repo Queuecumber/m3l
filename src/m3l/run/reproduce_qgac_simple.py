@@ -17,6 +17,8 @@ The dataset is in the ColorPatch class, a LightningDataModule. The rest of the p
 every 25 steps, we need to set max_steps in the trainer to 100 * 1000 steps total (100 artifical epochs where each artificial epoch is 1000 batches), and we need to set val_check_interval
 to 25 to validate every 25 batches.
 
+TODO probably get rid of this
+
 """
 import os
 from pathlib import Path

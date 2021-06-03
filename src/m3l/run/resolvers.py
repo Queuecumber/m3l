@@ -5,6 +5,10 @@ from pathlib import Path
 import hydra
 from omegaconf import OmegaConf
 
+"""
+TODO ask omry if he wants any of these
+"""
+
 OmegaConf.register_new_resolver("m3l.modpath", lambda: Path(__file__).parent.absolute())
 OmegaConf.register_new_resolver("m3l.mul", lambda *args: reduce(mul, args, 1))
 OmegaConf.register_new_resolver("m3l.sum", lambda *args: sum(args))

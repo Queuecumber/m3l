@@ -7,7 +7,7 @@ from torch import Tensor
 from torch.nn import Conv2d, ConvTranspose2d, Module, PReLU, Sequential
 from torchjpeg.dct import double_nn_dct
 
-from .weight_init import weight_init
+from .weight_init import small_weight_init
 
 
 class QGACLite(pl.LightningModule):
@@ -47,7 +47,7 @@ class QGACLite(pl.LightningModule):
 
             self.unblock_c = ConvolutionalFilterManifold(in_channels=64, out_channels=2, kernel_size=8, stride=8, manifold_channels=16, transposed=True)
 
-        self.apply(lambda m: weight_init(scale=0.1, m=m))
+        self.apply(lambda m: small_weight_init(scale=0.1, m=m))
 
     def forward(self, q_y: Tensor, y: Tensor, q_c: Optional[Tensor] = None, cbcr: Optional[Tensor] = None) -> Tensor:
         y = y + self.unblock_y(q_y, self.block_enhancer_y(self.block_y(q_y, y)))

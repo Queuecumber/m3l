@@ -15,7 +15,7 @@ from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 
 from ..loghelper import LogHelper
-from ..weight_init import weight_init
+from ..weight_init import small_weight_init
 from .qgac_base import QGACTrainingBatch
 
 
@@ -87,7 +87,7 @@ class QGACCrab(LogHelper, pl.LightningModule):
             transposed=True,
         )
 
-        self.apply(lambda m: weight_init(scale=0.1, m=m))
+        self.apply(lambda m: small_weight_init(scale=0.1, m=m))
 
     def forward(
         self,
