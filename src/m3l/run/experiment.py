@@ -18,19 +18,16 @@ class Experiment:
     job_type: Optional[str]
 
     def fit(self) -> None:
-        if _module_available("comet_ml"):
-            # HACK: for some reason comet complains about not being imported first, this shuts it up
-            import comet_ml
-
-            comet_ml.monkey_patching._reset_already_imported_modules()
-
         self.trainer.fit(self.net, self.data)
 
-        script = self.net.to_torchscript()
-        torch.jit.save(script, f"{self.name}.pt")
+        trainer.save_checkpoint("final.pt")
 
-        if hasattr(self.trainer.logger.experiment, "log_model"):
-            self.trainer.logger.experiment.log_model(self.name, f"{self.name}.pt")
+        if hasattr(self.trainer.logger.experiment, "log_artifact"):
+            from wandb import Artifact
+
+            artifact = wandb.Artifact(self.name, type="model")
+            artifact.add_file("final.pt")
+            self.trainer.logger.experiment.log_artifact(artifact)
 
     def test(self) -> None:
         ckpt = torch.load(self.checkpoint, map_location="cpu")
