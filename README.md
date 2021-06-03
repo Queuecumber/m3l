@@ -25,14 +25,14 @@ We are also *recommending* the following libraries
 
 By recommending we mean that code that is part of the project will be designed to use these librarie. Although it should not crash if presented with an alternative, it may not work completely. End-user model/dataset code that uses alternative libraries with M3L used to do the training/evaluations should work as expected. 
 
-## Long term goals
+## Long Term Goals
 
 * Incorporate a full set of restoration models (denoising, deblurring, compression correction, etc) for both images and videos (this will likely **not** include super resolution, BasicSR is already good for that)
 * Optional torchscript models for production deployments with minimal dependencies
 * Hyperparameter sweeps with optuna
 * torchhub for pre-trained weights
 
-## Guick Guide: Optimizing your own model
+## Optimizing Your Own Model
 
 Define your model in a LightningModule (see lightning docs)
 
