@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Union
+from typing import Sequence, Tuple, Union
 
 from torch import Tensor
-from torch.distributed import _get_default_store
 from torchvision.io import write_png
 
 from .serializer import Serializer

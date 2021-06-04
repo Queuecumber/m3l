@@ -6,16 +6,14 @@ from typing import Optional, Sequence, Union
 
 import pytorch_lightning as pl
 import torch.distributed
-from m3l.data.folder_of_jpeg_dataset import FolderOfJpegDataset
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.dataset import ConcatDataset
 from torch.utils.data.distributed import DistributedSampler
+from torchjpeg.data import FolderOfJpegDataset, JPEGQuantizedDataset, UnlabeledImageFolder
 from torchjpeg.dct import Stats
 from torchvision.transforms import ToTensor
 from torchvision.transforms.transforms import ColorJitter, Compose, RandomAffine, RandomCrop, RandomHorizontalFlip, RandomVerticalFlip
 
-from .jpeg_quantized_dataset import JPEGQuantizedDataset
-from .unlabeled_image_folder import UnlabeledImageFolder
 from .utils import copytree_progress
 
 log = logging.getLogger(__name__)

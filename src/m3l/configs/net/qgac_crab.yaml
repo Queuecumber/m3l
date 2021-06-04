@@ -5,4 +5,4 @@ defaults:
 _target_: m3l.models.QGACCrab
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${m3l.modpath:}/../stats/cstats.pt
+  root: color

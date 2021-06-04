@@ -60,7 +60,6 @@ Source code is in `src/m3l`,
 * data - all code for datasets, datamodules, serializers, and anything else data related
 * models - all model code including shared layers and utilities
 * run - runnable scripts and related machinery
-* stats - per-frequency per-channel DCT coefficient statistics in the format expected by torchjpeg
 
 ## Optimizing Your Own Model
 

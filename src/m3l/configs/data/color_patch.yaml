@@ -2,6 +2,6 @@ _target_: m3l.data.ColorPatch
 root_dir: ???
 stats: 
   _target_: torchjpeg.dct.Stats
-  root: ${m3l.modpath:}/../stats/cstats.pt
+  root: color
 batch_size: 32
 num_workers: 1

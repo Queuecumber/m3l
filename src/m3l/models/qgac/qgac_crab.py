@@ -4,13 +4,13 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple
 import pytorch_lightning as pl
 import torch
 import torch.distributed
-from m3l.data import crop_batch
 from m3l.models.layers import RRDB, ConvolutionalFilterManifold
 from torch import Tensor
 from torch.nn import ConvTranspose2d, Parameter, PReLU, Sequential
 from torch.nn.functional import l1_loss
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import _LRScheduler
+from torchjpeg.data import crop_batch
 from torchjpeg.dct import Stats, batch_to_images, double_nn_dct
 from torchjpeg.metrics import psnr, psnrb, ssim
 

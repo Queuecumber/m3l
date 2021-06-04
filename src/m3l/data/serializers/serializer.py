@@ -13,9 +13,12 @@ class Serializer(ABC):
     def get_sync_index(self):
         if torch.distributed.is_available():
             if self.__store is None:
-                self.__store = torch.distributed._get_default_store()
+                self.__store = torch.distributed.distributed_c10d._get_default_store()
 
             idx = self.__store.add(f"{type(self).__name__}_sync_index") - 1
             return idx
 
-        return (self.__sync_index := self.__sync_index + 1) - 1
+        idx = self.__sync_index
+        self.__sync_index += 1
+
+        return idx

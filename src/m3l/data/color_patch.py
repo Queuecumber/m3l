@@ -4,11 +4,10 @@ from typing import Optional, Union
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+from torchjpeg.data import JPEGQuantizedDataset, UnlabeledImageFolder
 from torchjpeg.dct import Stats
 from torchvision.transforms import ToTensor
 
-from .jpeg_quantized_dataset import JPEGQuantizedDataset
-from .unlabeled_image_folder import UnlabeledImageFolder
 from .utils import copytree_progress
 
 log = logging.getLogger(__name__)
