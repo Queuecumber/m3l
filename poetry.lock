@@ -846,7 +846,7 @@ typing-extensions = "*"
 
 [[package]]
 name = "torchjpeg"
-version = "0.9.18.dev5"
+version = "0.9.19"
 description = "Utilities for JPEG data access and manipulation in pytorch"
 category = "main"
 optional = false
@@ -1035,7 +1035,7 @@ wandb = ["wandb"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">= 3.7.1, < 4.0"
-content-hash = "48f3807720ad16e604cbe304484aad72841bc296150840e838e569b6d31a1b74"
+content-hash = "ae5a32f1048e26ac89da295a515005fa596ff25b086c9c2428db5917f8981e58"
 
 [metadata.files]
 absl-py = [
@@ -1671,10 +1671,10 @@ torch = [
     {file = "torch-1.8.1-cp39-none-macosx_10_9_x86_64.whl", hash = "sha256:225ee4238c019b28369c71977327deeeb2bd1c6b8557e6fcf631b8866bdc5447"},
 ]
 torchjpeg = [
-    {file = "torchjpeg-0.9.18.dev5-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:bcdd5601404c0913d99c9f35bff5977dd525935d727604ef31b2d2c624fb9981"},
-    {file = "torchjpeg-0.9.18.dev5-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:351d26382901b4e1f521c2c8afea1d44d898b2e6d84d7a80835ab78bbe75a081"},
-    {file = "torchjpeg-0.9.18.dev5-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:7626cfc37d7c5405631e06c038a9bb5e8eda101686709df1c8902d201c79e673"},
-    {file = "torchjpeg-0.9.18.dev5.tar.gz", hash = "sha256:5e919b5845d8d78efc5ca60e382b98aaadd16f75c1d20004f8f9de9879c150b1"},
+    {file = "torchjpeg-0.9.19-cp37-cp37m-manylinux2014_x86_64.whl", hash = "sha256:ca12d0723869b8037fdeb8ffe6d2676315921a4029a14e47c5e983f4c4c01e10"},
+    {file = "torchjpeg-0.9.19-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:7ee461608a3605485db276415a0b644290e6928018c37ca4c422497c03b6da29"},
+    {file = "torchjpeg-0.9.19-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:651b543653b55fc10c7632813411499302ffde74213363ebb225898bb8e8c8a9"},
+    {file = "torchjpeg-0.9.19.tar.gz", hash = "sha256:3eaa706b2a7a522d63551bbaf5574c6a4cf358b23c939dcb7a80472d34e6690d"},
 ]
 torchmetrics = [
     {file = "torchmetrics-0.3.2-py3-none-any.whl", hash = "sha256:04bfbfdf4fb12f7191fa86b4e42efb7205d4cb95e833b6add60f55fdba9ae5fb"},
