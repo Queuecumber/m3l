@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 import pytorch_lightning as pl
-import torch.jit
-from pytorch_lightning.utilities import _module_available
 
 
 @dataclass
@@ -20,7 +18,7 @@ class Experiment:
     def fit(self) -> None:
         self.trainer.fit(self.net, self.data)
 
-        trainer.save_checkpoint("final.pt")
+        self.trainer.save_checkpoint("final.pt")
 
         if hasattr(self.trainer.logger.experiment, "log_artifact"):
             from wandb import Artifact
