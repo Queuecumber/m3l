@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
@@ -18,9 +18,10 @@ class ExperimentConfig:
     trainer: Any = MISSING
     name: str = MISSING
     job_type: Optional[str] = None
-    cluster: Any = None
+    cluster: Optional[Dict[str, Any]] = None
     checkpoint: Optional[str] = None
     serializer: Optional[Any] = None
+    callbacks: Dict[str, Any] = field(default_factory=lambda: {"progress": {"_target_": "m3l.run.M3LProgress"}})
 
 
 @dataclass

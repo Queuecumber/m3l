@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Mapping, Optional
 
 import pytorch_lightning as pl
 
@@ -10,10 +10,11 @@ class Experiment:
     net: pl.LightningModule
     trainer: pl.Trainer
     name: str
-    cluster: Any
+    cluster: Optional[Mapping[str, Any]]
     checkpoint: Optional[str]
     serializer: Optional[Callable]
     job_type: Optional[str]
+    callbacks: Mapping[str, Any]
 
     def fit(self) -> None:
         self.trainer.fit(self.net, self.data)

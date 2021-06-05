@@ -15,5 +15,11 @@ net:
   scheduler:
     eta_min: 1e-6
 
+callbacks:
+  checkpoint:
+    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: val/psnr
+    mode: max
+
 name: qgac_crab
   
