@@ -6,6 +6,7 @@ from typing import Optional, Sequence, Union
 
 import pytorch_lightning as pl
 import torch.distributed
+from PIL import Image
 from torch.utils.data import DataLoader, RandomSampler
 from torch.utils.data.dataset import ConcatDataset
 from torch.utils.data.distributed import DistributedSampler
@@ -70,9 +71,9 @@ class VariedPatch(pl.LightningDataModule):
 
         self.train_transforms = Compose(
             [
-                # RandomAffine(degrees=15, translate=(0.1, 0.3), scale=(0.7, 1.3), shear=(-15, 15, -15, 15), resample=Image.BILINEAR),
+                RandomAffine(degrees=15, translate=(0.1, 0.3), scale=(0.7, 1.3), shear=(-10, 10, -10, 10), resample=Image.BILINEAR),
                 RandomCrop(size=256, pad_if_needed=True),
-                # ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.15),
+                ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
                 RandomHorizontalFlip(),
                 RandomVerticalFlip(),
                 ToTensor(),
