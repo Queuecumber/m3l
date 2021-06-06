@@ -138,6 +138,20 @@ defaults:
   - /logger: wandb
 ```
 
+WandB can automatically upload models after each run, to enable this set `log_model` to true:
+
+```
+# @package _global_
+defaults:
+  ...
+  - /logger: wandb
+  ...
+  trainer:
+  ...
+    logger:
+      log_model: yes
+```
+
 If you want to use another logger, you need to set up the configs for it yourself.
 
 ## Compute Cluster
@@ -199,9 +213,9 @@ This config automatically scales the number of GPUs and memory based on the numb
 
 Assuming this file is saved as `<config dir>/cluster/vulcan.yaml`, launch distributed training (on the **submission node** as follows)
 
-`python -m m3l.run.train --multirun model=my_model cluster=vulcan trainer.gpus=4`
+`python -m m3l.run.train --cluster-launch model=my_model cluster=vulcan trainer.gpus=4`
 
-Note the `--multirun` argument. This will request 4 GPUs and submit your job to slurm, it will tell you the job's directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
+Note the `--cluster-launch` argument. This will request 4 GPUs and submit your job to slurm, it will tell you the job's directory where you can find stdout/stderr models, etc. If you're using wandb you can also view stdout/stderr on the dashboard there.
 
 ## Adding a Model/Dataset to M3L
 
