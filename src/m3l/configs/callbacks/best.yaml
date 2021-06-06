@@ -1,0 +1,6 @@
+# @package callbacks.best
+_target_: pytorch_lightning.callbacks.ModelCheckpoint
+monitor: ???
+mode: max
+filename: best-epoch{epoch:03d}
+auto_insert_metric_name: no

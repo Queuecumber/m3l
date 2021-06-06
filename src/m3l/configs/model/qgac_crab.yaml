@@ -2,6 +2,8 @@
 defaults:
   - /data: varied_patch
   - /net: qgac_crab
+  - /callbacks:
+    - best    
   - optional /overrides: qgac_crab
   - override /serializer: image_serializer
 
@@ -16,12 +18,9 @@ net:
     eta_min: 1e-6
 
 callbacks:
-  checkpoint:
-    _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  best:
     monitor: val/psnr
-    mode: max
     filename: best-epoch{epoch:03d}-psnr{val/psnr:.2f}
-    auto_insert_metric_name: no
 
 name: qgac_crab
   
