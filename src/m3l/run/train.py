@@ -15,4 +15,5 @@ def main(cfg: ExperimentConfig) -> Sequence[float]:
 
 
 if __name__ == "__main__":
+    customize_args()
     main()

@@ -43,3 +43,8 @@ class WandbConfig:
 cs = ConfigStore.instance()
 cs.store(name="experiment", node=ExperimentConfig, provider="m3l")
 cs.store(group="logger", name="wandb", package="trainer.logger", node=WandbConfig, provider="m3l")
+
+
+def customize_args() -> None:
+    if "--cluster-launch" in sys.argv:
+        sys.argv[sys.argv.index("--cluster-launch")] = "--multirun"

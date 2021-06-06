@@ -13,4 +13,5 @@ def main(cfg: ExperimentConfig) -> None:
 
 
 if __name__ == "__main__":
+    customize_args()
     main()
