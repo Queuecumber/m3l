@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -22,6 +23,7 @@ class ExperimentConfig:
     checkpoint: Optional[str] = None
     serializer: Optional[Any] = None
     callbacks: Dict[str, Any] = field(default_factory=lambda: {"progress": {"_target_": "m3l.run.M3LProgress"}})
+    optimize_metrics: List[str] = field(default_factory=list)
 
 
 @dataclass

@@ -9,7 +9,7 @@ from .resolvers import *
 @hydra.main(config_name="correct", config_path="../configs")
 def main(cfg: ExperimentConfig) -> None:
     e: Experiment = instantiate(cfg)
-    e.correct()
+    return e.correct()
 
 
 if __name__ == "__main__":

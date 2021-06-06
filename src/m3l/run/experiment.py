@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 import pytorch_lightning as pl
 
@@ -15,22 +15,17 @@ class Experiment:
     serializer: Optional[Callable]
     job_type: Optional[str]
     callbacks: Mapping[str, Any]
+    optimize_metrics: Sequence[str]
 
-    def fit(self) -> None:
+    def fit(self) -> Sequence[float]:
         self.trainer.fit(self.net, self.data)
+        metrics = map(trainer.callback_metrics.get, self.optimize_metrics)
+        metrics = [float(m) for m in metrics if m is not None]
+        return metrics
 
-        self.trainer.save_checkpoint("final.pt")
-
-        if hasattr(self.trainer.logger.experiment, "log_artifact"):
-            from wandb import Artifact
-
-            artifact = wandb.Artifact(self.name, type="model")
-            artifact.add_file("final.pt")
-            self.trainer.logger.experiment.log_artifact(artifact)
-
-    def test(self) -> None:
+    def test(self) -> Sequence[Mapping[str, Any]]:
         self.net = type(self.net).load_from_checkpoint(self.checkpoint, map_location="cpu")
-        self.trainer.test(self.net, datamodule=self.data)
+        return self.trainer.test(self.net, datamodule=self.data)
 
     def correct(self) -> None:
         self.net = type(self.net).load_from_checkpoint(self.checkpoint, map_location="cpu")

@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import hydra
 from hydra.utils import instantiate
 
@@ -7,9 +9,9 @@ from .resolvers import *
 
 
 @hydra.main(config_name="train", config_path="../configs")
-def main(cfg: ExperimentConfig) -> None:
+def main(cfg: ExperimentConfig) -> Sequence[float]:
     e: Experiment = instantiate(cfg)
-    e.fit()
+    return e.fit()
 
 
 if __name__ == "__main__":

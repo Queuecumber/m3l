@@ -20,6 +20,8 @@ callbacks:
     _target_: pytorch_lightning.callbacks.ModelCheckpoint
     monitor: val/psnr
     mode: max
+    filename: best-epoch{epoch:03d}-psnr{val/psnr:.2f}
+    auto_insert_metric_name: no
 
 name: qgac_crab
   
