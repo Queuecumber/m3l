@@ -4,6 +4,7 @@ defaults:
   - /net: qgac_crab
   - /callbacks:
     - best    
+  - _self_
   - optional /overrides: qgac_crab
   - override /serializer: image_serializer
 
