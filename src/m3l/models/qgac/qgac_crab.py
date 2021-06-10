@@ -131,9 +131,6 @@ class QGACCrab(LogHelper, pl.LightningModule):
 
         return loss
 
-    def training_epoch_end(self, training_step_outputs):
-        self.log("train/lr", self.optimizers().optimizer.param_groups[0]["lr"], prog_bar=True)
-
     def validation_step(self, batch: QGACTrainingBatch, batch_idx: int):
         y, cbcr, q_y, q_c, target, sizes, _ = batch
 
@@ -149,9 +146,9 @@ class QGACCrab(LogHelper, pl.LightningModule):
         psnrb_e = torch.cat([psnrb(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
         ssim_e = torch.cat([ssim(r.unsqueeze(0), t.unsqueeze(0)).view(-1) for r, t in zip(restored_seq, target_seq)])
 
-        self.log("val/psnr", psnr_e, prog_bar=True, sync_dist=True)
-        self.log("val/psnrb", psnrb_e, sync_dist=True)
-        self.log("val/ssim", ssim_e, sync_dist=True)
+        self.log("val/psnr", psnr_e.mean(), prog_bar=True, sync_dist=True)
+        self.log("val/psnrb", psnrb_e.mean(), sync_dist=True)
+        self.log("val/ssim", ssim_e.mean(), sync_dist=True)
 
         if batch_idx == 0:
             self.log_image("val/restored", restored_seq[0])
