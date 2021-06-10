@@ -7,6 +7,7 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
 
 experiment_defaults = [{"trainer": "lightning"}, {"serializer": None}]
+callback_defaults = {"progress": {"_target_": "m3l.run.M3LProgress"}, "lr_monitor": {"_target_": "pytorch_lightning.callbacks.LearningRateMonitor"}}
 
 
 @dataclass
@@ -22,7 +23,7 @@ class ExperimentConfig:
     cluster: Optional[Dict[str, Any]] = None
     checkpoint: Optional[str] = None
     serializer: Optional[Any] = None
-    callbacks: Dict[str, Any] = field(default_factory=lambda: {"progress": {"_target_": "m3l.run.M3LProgress"}})
+    callbacks: Dict[str, Any] = field(default_factory=lambda: callback_defaults)
     optimize_metrics: List[str] = field(default_factory=list)
 
 
