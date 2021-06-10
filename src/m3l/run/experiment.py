@@ -19,7 +19,7 @@ class Experiment:
 
     def fit(self) -> Sequence[float]:
         self.trainer.fit(self.net, self.data)
-        metrics = map(trainer.callback_metrics.get, self.optimize_metrics)
+        metrics = map(self.trainer.callback_metrics.get, self.optimize_metrics)
         metrics = [float(m) for m in metrics if m is not None]
         return metrics
 
