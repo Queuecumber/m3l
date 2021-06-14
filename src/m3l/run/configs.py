@@ -1,12 +1,11 @@
 import sys
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
 
-experiment_defaults = [{"trainer": "lightning"}, {"serializer": None}]
+experiment_defaults = [{"trainer": "lightning"}]
 callback_defaults = {"progress": {"_target_": "m3l.run.M3LProgress"}, "lr_monitor": {"_target_": "pytorch_lightning.callbacks.LearningRateMonitor"}}
 
 

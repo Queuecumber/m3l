@@ -3,10 +3,11 @@ defaults:
   - /data: varied_patch
   - /net: qgac_crab
   - /callbacks:
-    - best    
+    - best
+  - /serializer: image_serializer    
   - _self_
   - optional /overrides: qgac_crab
-  - override /serializer: image_serializer
+  
 
 trainer:
   max_epochs: 200

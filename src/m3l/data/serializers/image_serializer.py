@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 
 from torch import Tensor
 from torchvision.io import write_png
@@ -12,7 +12,10 @@ class ImageSerializer(Serializer):
     TODO should these be upstreamed someplace?
     """
 
-    def __init__(self, root_dir: Union[str, Path], pad: int = 5) -> None:
+    def __init__(self, root_dir: Optional[Union[str, Path]] = None, pad: int = 5) -> None:
+        if root_dir is None:
+            root_dir = Path.cwd()
+
         if isinstance(root_dir, str):
             root_dir = Path(root_dir)
 
